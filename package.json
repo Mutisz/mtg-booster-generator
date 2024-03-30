@@ -1,0 +1,50 @@
+{
+  "name": "mtg-booster-generator",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Generates random MTG boosters from your card collection.",
+  "license": "MIT",
+  "author": {
+    "name": "Mateusz Tokarski",
+    "email": "mati.tokarski@gmail.com"
+  },
+  "main": "index.html",
+  "scripts": {
+    "dev:build": "rimraf ./build && rollup --config rollup.dev.config.js",
+    "dev:watch": "rimraf ./build && rollup --config rollup.dev.config.js -w",
+    "build": "rimraf ./build && rollup --config rollup.prod.config.js",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  },
+  "dependencies": {
+    "@types/bootstrap": "^5.2.10",
+    "@types/lodash": "^4.17.0",
+    "@types/react": "^18.2.67",
+    "@types/react-dom": "^18.2.22",
+    "bootstrap": "^5.3.3",
+    "lodash": "^4.17.21",
+    "react": "^18.2.0",
+    "react-bootstrap": "^2.10.2",
+    "react-dom": "^18.2.0",
+    "react-error-boundary": "^4.0.13",
+    "usehooks-ts": "^3.0.2"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-replace": "^5.0.5",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "gh-pages": "^6.1.1",
+    "prettier": "^3.2.5",
+    "prettier-plugin-organize-imports": "^3.2.4",
+    "rimraf": "^5.0.5",
+    "rollup": "^4.13.0",
+    "rollup-plugin-copy": "^3.5.0",
+    "rollup-plugin-serve": "^1.1.1",
+    "rollup-plugin-typescript2": "^0.36.0",
+    "rollup-watch": "^4.3.1",
+    "typescript": "^5.4.3",
+    "typescript-eslint": "^7.3.1"
+  }
+}
