@@ -8,6 +8,11 @@
     "name": "Mateusz Tokarski",
     "email": "mati.tokarski@gmail.com"
   },
+  "homepage": "https://mutisz.github.io/mtg-booster-generator",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mutisz/mtg-booster-generator"
+  },
   "main": "index.html",
   "scripts": {
     "dev:build": "rimraf ./build && rollup --config rollup.dev.config.js",

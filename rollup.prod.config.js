@@ -2,6 +2,7 @@
 
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
+import replace from '@rollup/plugin-replace';
 import copy from 'rollup-plugin-copy';
 import typescript from 'rollup-plugin-typescript2';
 
@@ -17,6 +18,10 @@ export default {
     copy({ targets: [{ src: 'public/**/*', dest: 'build' }] }),
     commonjs(),
     typescript({ tsconfig: './tsconfig.json' }),
+    replace({
+      preventAssignment: true,
+      'process.env.NODE_ENV': JSON.stringify('production'),
+    }),
   ],
   onwarn(warning, warn) {
     if (warning.code !== 'MODULE_LEVEL_DIRECTIVE') {
