@@ -70,7 +70,7 @@
 		hasRequiredReact_development = 1;
 		(function (module, exports) {
 
-			if (process.env.NODE_ENV !== "production") {
+			if (production !== "production") {
 			  (function() {
 
 			/* global __REACT_DEVTOOLS_GLOBAL_HOOK__ */
@@ -2799,7 +2799,7 @@
 		return react_development.exports;
 	}
 
-	if (process.env.NODE_ENV === 'production') {
+	if (production === 'production') {
 	  react.exports = requireReact_production_min();
 	} else {
 	  react.exports = requireReact_development();
@@ -2846,7 +2846,7 @@
 		if (hasRequiredReactJsxRuntime_development) return reactJsxRuntime_development;
 		hasRequiredReactJsxRuntime_development = 1;
 
-		if (process.env.NODE_ENV !== "production") {
+		if (production !== "production") {
 		  (function() {
 
 		var React = reactExports;
@@ -4150,7 +4150,7 @@
 		return reactJsxRuntime_development;
 	}
 
-	if (process.env.NODE_ENV === 'production') {
+	if (production === 'production') {
 	  jsxRuntime.exports = requireReactJsxRuntime_production_min();
 	} else {
 	  jsxRuntime.exports = requireReactJsxRuntime_development();
@@ -4217,7 +4217,7 @@
 		hasRequiredScheduler_development = 1;
 		(function (exports) {
 
-			if (process.env.NODE_ENV !== "production") {
+			if (production !== "production") {
 			  (function() {
 
 			/* global __REACT_DEVTOOLS_GLOBAL_HOOK__ */
@@ -4835,7 +4835,7 @@
 		if (hasRequiredScheduler) return scheduler.exports;
 		hasRequiredScheduler = 1;
 
-		if (process.env.NODE_ENV === 'production') {
+		if (production === 'production') {
 		  scheduler.exports = requireScheduler_production_min();
 		} else {
 		  scheduler.exports = requireScheduler_development();
@@ -5189,7 +5189,7 @@
 		if (hasRequiredReactDom_development) return reactDom_development;
 		hasRequiredReactDom_development = 1;
 
-		if (process.env.NODE_ENV !== "production") {
+		if (production !== "production") {
 		  (function() {
 
 		/* global __REACT_DEVTOOLS_GLOBAL_HOOK__ */
@@ -35030,7 +35030,7 @@
 	  ) {
 	    return;
 	  }
-	  if (process.env.NODE_ENV !== 'production') {
+	  if (production !== 'production') {
 	    // This branch is unreachable because this function is only called
 	    // in production, but the condition is true only in development.
 	    // Therefore if the branch is still here, dead code elimination wasn't
@@ -35050,7 +35050,7 @@
 	  }
 	}
 
-	if (process.env.NODE_ENV === 'production') {
+	if (production === 'production') {
 	  // DCE check should happen before ReactDOM bundle executes so that
 	  // DevTools can report bad minification during injection.
 	  checkDCE();
@@ -35063,7 +35063,7 @@
 	var ReactDOM = /*@__PURE__*/getDefaultExportFromCjs(reactDomExports);
 
 	var m = reactDomExports;
-	if (process.env.NODE_ENV === 'production') {
+	if (production === 'production') {
 	  client.createRoot = m.createRoot;
 	  client.hydrateRoot = m.hydrateRoot;
 	} else {
@@ -53260,7 +53260,7 @@
 
 
 
-		if (process.env.NODE_ENV !== "production") {
+		if (production !== "production") {
 		  (function() {
 
 		// The Symbol used to tag the ReactElement-like types. If there is no native Symbol
@@ -53436,7 +53436,7 @@
 		if (hasRequiredReactIs) return reactIs.exports;
 		hasRequiredReactIs = 1;
 
-		if (process.env.NODE_ENV === 'production') {
+		if (production === 'production') {
 		  reactIs.exports = requireReactIs_production_min();
 		} else {
 		  reactIs.exports = requireReactIs_development();
@@ -53588,7 +53588,7 @@
 
 		var printWarning = function() {};
 
-		if (process.env.NODE_ENV !== 'production') {
+		if (production !== 'production') {
 		  var ReactPropTypesSecret = requireReactPropTypesSecret();
 		  var loggedTypeFailures = {};
 		  var has = requireHas();
@@ -53619,7 +53619,7 @@
 		 * @private
 		 */
 		function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
-		  if (process.env.NODE_ENV !== 'production') {
+		  if (production !== 'production') {
 		    for (var typeSpecName in typeSpecs) {
 		      if (has(typeSpecs, typeSpecName)) {
 		        var error;
@@ -53674,7 +53674,7 @@
 		 * @private
 		 */
 		checkPropTypes.resetWarningCache = function() {
-		  if (process.env.NODE_ENV !== 'production') {
+		  if (production !== 'production') {
 		    loggedTypeFailures = {};
 		  }
 		};
@@ -53706,7 +53706,7 @@
 
 		var printWarning = function() {};
 
-		if (process.env.NODE_ENV !== 'production') {
+		if (production !== 'production') {
 		  printWarning = function(text) {
 		    var message = 'Warning: ' + text;
 		    if (typeof console !== 'undefined') {
@@ -53859,7 +53859,7 @@
 		  PropTypeError.prototype = Error.prototype;
 
 		  function createChainableTypeChecker(validate) {
-		    if (process.env.NODE_ENV !== 'production') {
+		    if (production !== 'production') {
 		      var manualPropTypeCallCache = {};
 		      var manualPropTypeWarningCount = 0;
 		    }
@@ -53877,7 +53877,7 @@
 		          );
 		          err.name = 'Invariant Violation';
 		          throw err;
-		        } else if (process.env.NODE_ENV !== 'production' && typeof console !== 'undefined') {
+		        } else if (production !== 'production' && typeof console !== 'undefined') {
 		          // Old behavior for people using React.PropTypes
 		          var cacheKey = componentName + ':' + propName;
 		          if (
@@ -53999,7 +53999,7 @@
 
 		  function createEnumTypeChecker(expectedValues) {
 		    if (!Array.isArray(expectedValues)) {
-		      if (process.env.NODE_ENV !== 'production') {
+		      if (production !== 'production') {
 		        if (arguments.length > 1) {
 		          printWarning(
 		            'Invalid arguments supplied to oneOf, expected an array, got ' + arguments.length + ' arguments. ' +
@@ -54057,7 +54057,7 @@
 
 		  function createUnionTypeChecker(arrayOfTypeCheckers) {
 		    if (!Array.isArray(arrayOfTypeCheckers)) {
-		      process.env.NODE_ENV !== 'production' ? printWarning('Invalid argument supplied to oneOfType, expected an instance of array.') : void 0;
+		      production !== 'production' ? printWarning('Invalid argument supplied to oneOfType, expected an instance of array.') : void 0;
 		      return emptyFunctionThatReturnsNull;
 		    }
 
@@ -54379,7 +54379,7 @@
 	 * LICENSE file in the root directory of this source tree.
 	 */
 
-	if (process.env.NODE_ENV !== 'production') {
+	if (production !== 'production') {
 	  var ReactIs = requireReactIs();
 
 	  // By explicitly using `prop-types` you are opting into new development behavior.
@@ -54399,12 +54399,12 @@
 	  disabled: false
 	};
 
-	var timeoutsShape = process.env.NODE_ENV !== 'production' ? PropTypes.oneOfType([PropTypes.number, PropTypes.shape({
+	var timeoutsShape = production !== 'production' ? PropTypes.oneOfType([PropTypes.number, PropTypes.shape({
 	  enter: PropTypes.number,
 	  exit: PropTypes.number,
 	  appear: PropTypes.number
 	}).isRequired]) : null;
-	process.env.NODE_ENV !== 'production' ? PropTypes.oneOfType([PropTypes.string, PropTypes.shape({
+	production !== 'production' ? PropTypes.oneOfType([PropTypes.string, PropTypes.shape({
 	  enter: PropTypes.string,
 	  exit: PropTypes.string,
 	  active: PropTypes.string
@@ -54829,7 +54829,7 @@
 	}(React.Component);
 
 	Transition.contextType = TransitionGroupContext;
-	Transition.propTypes = process.env.NODE_ENV !== "production" ? {
+	Transition.propTypes = production !== "production" ? {
 	  /**
 	   * A React reference to DOM element that need to transition:
 	   * https://stackoverflow.com/a/51127130/4671932
@@ -55929,7 +55929,7 @@
 	 * same logic and follow the same code paths.
 	 */
 
-	var __DEV__ = process.env.NODE_ENV !== 'production';
+	var __DEV__ = production !== 'production';
 
 	var warning = function() {};
 
@@ -55997,7 +55997,7 @@
 	    controlId
 	  } = reactExports.useContext(FormContext$1);
 	  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-control');
-	  process.env.NODE_ENV !== "production" ? warning$1(controlId == null || !id, '`controlId` is ignored on `<FormControl>` when `id` is specified.') : void 0;
+	  production !== "production" ? warning$1(controlId == null || !id, '`controlId` is ignored on `<FormControl>` when `id` is specified.') : void 0;
 	  return /*#__PURE__*/jsxRuntimeExports.jsx(Component, {
 	    ...props,
 	    type: type,
@@ -56046,7 +56046,7 @@
 	  let columnClass = 'col-form-label';
 	  if (typeof column === 'string') columnClass = `${columnClass} ${columnClass}-${column}`;
 	  const classes = classNames(className, bsPrefix, visuallyHidden && 'visually-hidden', column && columnClass);
-	  process.env.NODE_ENV !== "production" ? warning$1(controlId == null || !htmlFor, '`controlId` is ignored on `<FormLabel>` when `htmlFor` is specified.') : void 0;
+	  production !== "production" ? warning$1(controlId == null || !htmlFor, '`controlId` is ignored on `<FormLabel>` when `htmlFor` is specified.') : void 0;
 	  htmlFor = htmlFor || controlId;
 	  if (column) return /*#__PURE__*/jsxRuntimeExports.jsx(Col, {
 	    ref: ref,
