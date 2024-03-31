@@ -9,6 +9,12 @@ import { Source } from '../../state';
 import CredentialsDeckboxFileForm from './CredentialsDeckboxFileForm';
 import CredentialsMoxfieldForm from './CredentialsMoxfieldForm';
 
+const sourceNameMap = {
+  [Source.MoxfieldApi]: 'Moxfield API',
+  [Source.MoxfieldFile]: 'Moxfield file',
+  [Source.DeckboxFile]: 'Deckbox file',
+};
+
 const renderCredentialsForm = (source: Source | null) => {
   if (source === Source.MoxfieldApi) {
     return <CredentialsMoxfieldForm />;
@@ -36,7 +42,7 @@ const CredentialsPanel: React.FC = () => {
             >
               {Object.values(Source).map((value) => (
                 <option key={value} value={value}>
-                  {value}
+                  {sourceNameMap[value]}
                 </option>
               ))}
             </Form.Select>
