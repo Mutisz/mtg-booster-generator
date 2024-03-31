@@ -34,7 +34,9 @@ const dataUrl = 'https://www.moxfield.com/cards';
 const searchUrl = `${apiUrl}/collections/search?pageSize=100&sortType=cardName&sortDirection=ascending`;
 
 const getImgUrlList = (cardData: CollectionCardData): string[] =>
-  cardData.card.card_faces.map((cardFace) => `${imgUrl}/card-face-${cardFace.id}-normal.webp`);
+  cardData.card.card_faces.length > 0
+    ? cardData.card.card_faces.map((cardFace) => `${imgUrl}/card-face-${cardFace.id}-normal.webp`)
+    : [`${imgUrl}/card-${cardData.card.id}-normal.webp`];
 
 const getDataUrl = (cardData: CollectionCardData): string => `${dataUrl}/${cardData.card.id}`;
 
