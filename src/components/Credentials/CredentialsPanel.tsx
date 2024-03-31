@@ -6,11 +6,15 @@ import Form from 'react-bootstrap/Form';
 
 import { useCredentialsSource } from '../../hooks/useCredentialsSource';
 import { Source } from '../../state';
+import CredentialsDeckboxFileForm from './CredentialsDeckboxFileForm';
 import CredentialsMoxfieldForm from './CredentialsMoxfieldForm';
 
 const renderCredentialsForm = (source: Source | null) => {
   if (source === Source.MoxfieldApi) {
     return <CredentialsMoxfieldForm />;
+  }
+  if (source === Source.DeckboxFile) {
+    return <CredentialsDeckboxFileForm />;
   }
 
   throw new Error('Unhandled collection source!');
