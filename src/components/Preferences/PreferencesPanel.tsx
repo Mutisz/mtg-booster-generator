@@ -29,7 +29,7 @@ const useExpansionSetNameList = () => {
 const PreferencesPanel: React.FC = () => {
   const { preferences, setPreferences } = usePreferences();
   const { cardCollection } = useCardCollection();
-  const { generateCardBoosterList } = useCardBoosterList();
+  const { cardBoosterList, generateCardBoosterList } = useCardBoosterList();
   const expansionSetNameList = useExpansionSetNameList();
 
   return (
@@ -97,8 +97,7 @@ const PreferencesPanel: React.FC = () => {
             />
           </Form.Group>
           <Button
-            style={{ position: 'absolute', bottom: 'var(--bs-card-spacer-y)' }}
-            variant="primary"
+            variant={cardBoosterList.length === 0 ? 'primary' : 'success'}
             disabled={cardCollection.length === 0}
             onClick={generateCardBoosterList}
           >

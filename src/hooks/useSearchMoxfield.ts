@@ -3,6 +3,7 @@ import { useErrorBoundary } from 'react-error-boundary';
 
 import { CollectionSearchError } from '../errors/CollectionSearchError';
 import { CollectionCard, ManaColor, Rarity, Source } from '../state';
+import { useCardBoosterList } from './useCardBoosterList';
 import { useCardCollection } from './useCardCollection';
 import { useCredentialsMoxfield } from './useCredentialsMoxfield';
 
@@ -58,6 +59,7 @@ const getManaColorList = (colorList: string[]): ManaColor[] =>
   });
 
 const fetchCollectionPage = async (
+  setProgress: (progress: number) => void,
   bearerToken: string,
   page: number = 1,
   collection: CollectionCard[] = [],
@@ -76,8 +78,7 @@ const fetchCollectionPage = async (
   const collectionPageData = collectionPage.data.filter(
     (cardData) => cardData.card.type_line.match(basicLandRegex) === null,
   );
-
-  const collectionWithPageData = [
+  const collectionNew = [
     ...collection,
     ...collectionPageData.map((cardData) => ({
       id: cardData.card.id,
@@ -91,20 +92,25 @@ const fetchCollectionPage = async (
     })),
   ];
 
+  setProgress((page / collectionPage.totalPages) * 100);
+
   return page !== collectionPage.totalPages
-    ? fetchCollectionPage(bearerToken, ++page, collectionWithPageData)
-    : collectionWithPageData;
+    ? fetchCollectionPage(setProgress, bearerToken, ++page, collectionNew)
+    : collectionNew;
 };
 
 export const useSearchMoxfield = () => {
-  const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState<number>(0);
   const { showBoundary } = useErrorBoundary<Error>();
   const { credentialsMoxfield } = useCredentialsMoxfield();
   const { cardCollection, setCardCollection } = useCardCollection();
+  const { resetCardBoosterList } = useCardBoosterList();
 
   const fetchCollection = async () => {
     try {
-      const newCardCollection = await fetchCollectionPage(credentialsMoxfield.bearerToken);
+      setCardCollection([]);
+      resetCardBoosterList();
+      const newCardCollection = await fetchCollectionPage(setProgress, credentialsMoxfield.bearerToken);
       setCardCollection(newCardCollection);
     } catch (error) {
       showBoundary(
@@ -118,15 +124,14 @@ export const useSearchMoxfield = () => {
   };
 
   const searchAndUpdate = useCallback(async () => {
-    if (loading === false) {
-      setLoading(true);
+    if (progress === 0) {
       await fetchCollection();
-      setLoading(false);
+      setProgress(0);
     }
   }, []);
 
   return {
-    cardCollectionLoading: loading,
+    cardCollectionProgress: progress,
     cardCollection,
     searchAndUpdate,
   };

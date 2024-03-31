@@ -3,6 +3,7 @@ import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
+import ProgressBar from 'react-bootstrap/ProgressBar';
 
 import { useCredentialsMoxfield } from '../../hooks/useCredentialsMoxfield';
 import { usePreferences } from '../../hooks/usePreferences';
@@ -12,7 +13,7 @@ import { defaults } from '../../state';
 const CredentialsMoxfieldForm: React.FC = () => {
   const { credentialsMoxfield, setCredentialsMoxfield } = useCredentialsMoxfield();
   const { preferences, setPreferences } = usePreferences();
-  const { cardCollectionLoading, searchAndUpdate } = useSearchMoxfield();
+  const { cardCollectionProgress, cardCollection, searchAndUpdate } = useSearchMoxfield();
 
   return (
     <>
@@ -38,17 +39,20 @@ const CredentialsMoxfieldForm: React.FC = () => {
           .
         </p>
       </Alert>
-      <Button
-        style={{ position: 'absolute', bottom: 'var(--bs-card-spacer-y)' }}
-        variant="primary"
-        disabled={credentialsMoxfield.bearerToken === '' || cardCollectionLoading === true}
-        onClick={() => {
-          setPreferences({ ...preferences, expansionSetNameList: defaults.preferences.expansionSetNameList });
-          void searchAndUpdate();
-        }}
-      >
-        Fetch collection
-      </Button>
+      {cardCollectionProgress === 0 ? (
+        <Button
+          variant={cardCollection.length === 0 ? 'primary' : 'success'}
+          disabled={credentialsMoxfield.bearerToken === ''}
+          onClick={() => {
+            setPreferences({ ...preferences, expansionSetNameList: defaults.preferences.expansionSetNameList });
+            void searchAndUpdate();
+          }}
+        >
+          Fetch collection
+        </Button>
+      ) : (
+        <ProgressBar now={cardCollectionProgress} label={`${cardCollectionProgress}%`} visuallyHidden />
+      )}
     </>
   );
 };
