@@ -73,8 +73,8 @@ const generateBoosterPart = (
   return {
     boosterCardList: boosterCardList.map((card) => ({
       cardName: card.cardName,
-      scryfallId: card.scryfallId,
-      multiverseIdList: card.multiverseIdList,
+      imgUrlList: card.imgUrlList,
+      dataUrl: card.dataUrl,
     })),
     cardCollectionNew: cardCollectionNoBooster,
   };
@@ -114,12 +114,15 @@ export const useCardBoosterList = () => {
   const { preferences } = usePreferences();
   const { cardCollection } = useCardCollection();
 
+  const resetCardBoosterList = () => setCardBoosterList([]);
+
   return {
     cardBoosterList,
     generateCardBoosterList: () => {
+      resetCardBoosterList();
       const boosterList = generateBoosterList(preferences, _.cloneDeep(cardCollection));
       setCardBoosterList(boosterList);
     },
-    resetCardBoosterList: () => setCardBoosterList([]),
+    resetCardBoosterList,
   };
 };

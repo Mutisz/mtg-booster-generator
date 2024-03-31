@@ -13,22 +13,30 @@ type CollectionPageData = {
 };
 
 type CollectionCardData = {
-  id: string;
   quantity: number;
   card: {
     id: string;
-    scryfall_id: string;
     set_name: string;
     name: string;
     type_line: string;
     color_identity: string[];
     rarity: string;
-    multiverse_ids: string[];
+    card_faces: {
+      id: string;
+    }[];
   };
 };
 
-const baseUrl = 'https://api2.moxfield.com/v1';
-const searchUrl = `${baseUrl}/collections/search?pageSize=100&sortType=cardName&sortDirection=ascending`;
+const apiUrl = 'https://api2.moxfield.com/v1';
+const imgUrl = 'https://assets.moxfield.net/cards';
+const dataUrl = 'https://www.moxfield.com/cards';
+
+const searchUrl = `${apiUrl}/collections/search?pageSize=100&sortType=cardName&sortDirection=ascending`;
+
+const getImgUrlList = (cardData: CollectionCardData): string[] =>
+  cardData.card.card_faces.map((cardFace) => `${imgUrl}/card-face-${cardFace.id}-normal.webp`);
+
+const getDataUrl = (cardData: CollectionCardData): string => `${dataUrl}/${cardData.card.id}`;
 
 const basicLandRegex = /Basic.+Land/;
 
@@ -81,14 +89,13 @@ const fetchCollectionPage = async (
   const collectionNew = [
     ...collection,
     ...collectionPageData.map((cardData) => ({
-      id: cardData.card.id,
       quantity: cardData.quantity,
       setName: cardData.card.set_name,
       cardName: cardData.card.name,
       rarity: getRarity(cardData.card.rarity),
       color: getManaColorList(cardData.card.color_identity),
-      scryfallId: cardData.card.scryfall_id,
-      multiverseIdList: cardData.card.multiverse_ids,
+      imgUrlList: getImgUrlList(cardData),
+      dataUrl: getDataUrl(cardData),
     })),
   ];
 
@@ -116,7 +123,7 @@ export const useSearchMoxfield = () => {
       showBoundary(
         new CollectionSearchError(
           (error as Error).message,
-          Source.Moxfield,
+          Source.MoxfieldApi,
           'Please make sure that bearer token is valid and CORS is disabled as per instructions.',
         ),
       );

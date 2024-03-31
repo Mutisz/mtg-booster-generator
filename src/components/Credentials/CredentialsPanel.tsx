@@ -9,7 +9,7 @@ import { Source } from '../../state';
 import CredentialsMoxfieldForm from './CredentialsMoxfieldForm';
 
 const renderCredentialsForm = (source: Source | null) => {
-  if (source === Source.Moxfield) {
+  if (source === Source.MoxfieldApi) {
     return <CredentialsMoxfieldForm />;
   }
 
