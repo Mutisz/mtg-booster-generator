@@ -27,20 +27,14 @@ const CredentialsMoxfieldForm: React.FC = () => {
       <Alert variant="primary">
         <Alert.Heading>Usage</Alert.Heading>
         <p>
-          Moxfield does not currently provide an easily accessible public API, so to fetch collection from Moxfield you
-          need to extract the token from their website manually. Also CORS will need to be disabled so that browser does
-          not block request from this app to Moxfield.
-        </p>
-        <p>
-          To learn how to do this see readme{' '}
-          <a href="https://github.com/Mutisz/nms-taxonomy" target="_blank">
+          To check Moxfield configuration instructions see{' '}
+          <a href="https://github.com/Mutisz/mtg-booster-generator" target="_blank">
             here
           </a>
           .
         </p>
       </Alert>
       <Button
-        style={{ position: 'absolute', bottom: 'var(--bs-card-spacer-y)' }}
         variant="primary"
         disabled={credentialsMoxfield.bearerToken === '' || cardCollectionLoading === true}
         onClick={() => {
