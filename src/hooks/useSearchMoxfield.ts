@@ -19,6 +19,7 @@ type CollectionCardData = {
     scryfall_id: string;
     set_name: string;
     name: string;
+    type_line: string;
     color_identity: string[];
     rarity: string;
     multiverse_ids: string[];
@@ -27,6 +28,8 @@ type CollectionCardData = {
 
 const baseUrl = 'https://api2.moxfield.com/v1';
 const searchUrl = `${baseUrl}/collections/search?pageSize=100&sortType=cardName&sortDirection=ascending`;
+
+const basicLandRegex = /Basic.+Land/;
 
 const rarityMap: { [key: string]: Rarity } = {
   common: Rarity.Common,
@@ -69,11 +72,14 @@ const fetchCollectionPage = async (
     throw new Error('Unauthorized or invalid request!');
   }
 
-  const collectionPageData = (await collectionPageResponse.json()) as CollectionPageData;
+  const collectionPage = (await collectionPageResponse.json()) as CollectionPageData;
+  const collectionPageData = collectionPage.data.filter(
+    (cardData) => cardData.card.type_line.match(basicLandRegex) === null,
+  );
 
   const collectionWithPageData = [
     ...collection,
-    ...collectionPageData.data.map((cardData) => ({
+    ...collectionPageData.map((cardData) => ({
       id: cardData.card.id,
       quantity: cardData.quantity,
       setName: cardData.card.set_name,
@@ -85,7 +91,7 @@ const fetchCollectionPage = async (
     })),
   ];
 
-  return page !== collectionPageData.totalPages
+  return page !== collectionPage.totalPages
     ? fetchCollectionPage(bearerToken, ++page, collectionWithPageData)
     : collectionWithPageData;
 };
@@ -117,7 +123,7 @@ export const useSearchMoxfield = () => {
       await fetchCollection();
       setLoading(false);
     }
-  }, [loading]);
+  }, []);
 
   return {
     cardCollectionLoading: loading,
