@@ -3,6 +3,7 @@ import { useErrorBoundary } from 'react-error-boundary';
 
 import { CollectionSearchError } from '../errors/CollectionSearchError';
 import { CollectionCard, ManaColor, Rarity, Source } from '../state';
+import { removeBasicLand } from '../util/removeBasicLand';
 import { useCardBoosterList } from './useCardBoosterList';
 import { useCardCollection } from './useCardCollection';
 import { useCredentialsMoxfield } from './useCredentialsMoxfield';
@@ -39,8 +40,6 @@ const getImgUrlList = (cardData: CollectionCardData): string[] =>
     : [`${imgUrl}/card-${cardData.card.id}-normal.webp`];
 
 const getDataUrl = (cardData: CollectionCardData): string => `${dataUrl}/${cardData.card.id}`;
-
-const basicLandRegex = /Basic.+Land/;
 
 const rarityMap: { [key: string]: Rarity } = {
   common: Rarity.Common,
@@ -85,15 +84,13 @@ const fetchCollectionPage = async (
   }
 
   const collectionPage = (await collectionPageResponse.json()) as CollectionPageData;
-  const collectionPageData = collectionPage.data.filter(
-    (cardData) => cardData.card.type_line.match(basicLandRegex) === null,
-  );
   const collectionNew = [
     ...collection,
-    ...collectionPageData.map((cardData) => ({
+    ...collectionPage.data.map((cardData) => ({
       quantity: cardData.quantity,
       setName: cardData.card.set_name,
       cardName: cardData.card.name,
+      type: cardData.card.type_line,
       rarity: getRarity(cardData.card.rarity),
       color: getManaColorList(cardData.card.color_identity),
       imgUrlList: getImgUrlList(cardData),
@@ -120,7 +117,7 @@ export const useSearchMoxfield = () => {
       setCardCollection([]);
       resetCardBoosterList();
       const newCardCollection = await fetchCollectionPage(setProgress, credentialsMoxfield.bearerToken);
-      setCardCollection(newCardCollection);
+      setCardCollection(removeBasicLand(newCardCollection));
     } catch (error) {
       showBoundary(
         new CollectionSearchError(

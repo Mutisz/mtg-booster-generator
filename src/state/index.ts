@@ -41,6 +41,7 @@ export type CollectionCard = {
   quantity: number;
   setName: string;
   cardName: string;
+  type: string;
   rarity: Rarity;
   colorList?: ManaColor[];
   imgUrlList?: string[];

@@ -2,6 +2,7 @@ import csv from 'csvtojson';
 import { useCallback } from 'react';
 
 import { CollectionCard, Rarity } from '../state';
+import { removeBasicLand } from '../util/removeBasicLand';
 import { useCardBoosterList } from './useCardBoosterList';
 import { useCardCollection } from './useCardCollection';
 
@@ -41,12 +42,13 @@ export const useSearchDeckboxFile = () => {
       quantity: parseInt(cardData.Count),
       setName: cardData.Edition,
       cardName: cardData.Name,
+      type: cardData.Type,
       rarity: getRarity(cardData.Rarity),
       imgUrlList: [cardData['Image URL']],
       dataUrl: `${dataUrl}/${cardData.Name}?printing=${cardData['Printing Id']}`,
     }));
 
-    setCardCollection(collectionNew);
+    setCardCollection(removeBasicLand(collectionNew));
   }, []);
 
   return {
