@@ -12,8 +12,8 @@ You can use the app on [this GitHub page](https://mutisz.github.io/mtg-booster-g
 
 ## Moxfield configuration instructions
 
-Moxfield does not currently provide an easily accessible public API, so to fetch collection from Moxfield you need to extract the token from their website manually. Also CORS will need to be disabled so that browser does not block request from this app to Moxfield.
-To fetch bearer token:
+Moxfield does not currently provide a public API, so you need to extract the token from their website manually.
+Also CORS will need to be disabled so that browser does not block request from this app.
 
 1.  Login to [Moxfield](https://www.moxfield.com),
 2.  Open developer tools (F12) and navigate to network tab,

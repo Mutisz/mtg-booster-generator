@@ -38,7 +38,7 @@ const App: React.FC = () => {
         </Row>
       </Container>
       <Container className="my-4">
-        <Row>
+        <Row className="gy-4">
           <Col md={6}>
             <ErrorBoundary FallbackComponent={ErrorDismissible} onReset={() => setSource(defaults.credentials.source)}>
               <CredentialsPanel />

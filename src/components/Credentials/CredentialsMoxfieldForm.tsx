@@ -27,7 +27,11 @@ const CredentialsMoxfieldForm: React.FC = () => {
       <Alert variant="primary">
         <Alert.Heading>Usage</Alert.Heading>
         <p>
-          To check Moxfield configuration instructions see{' '}
+          Moxfield does not currently provide a public API, so you need to extract the token from their website
+          manually. Also CORS will need to be disabled so that browser does not block request from this app.
+        </p>
+        <p>
+          To learn how to do this see readme{' '}
           <a href="https://github.com/Mutisz/mtg-booster-generator" target="_blank">
             here
           </a>
@@ -35,6 +39,7 @@ const CredentialsMoxfieldForm: React.FC = () => {
         </p>
       </Alert>
       <Button
+        style={{ position: 'absolute', bottom: 'var(--bs-card-spacer-y)' }}
         variant="primary"
         disabled={credentialsMoxfield.bearerToken === '' || cardCollectionLoading === true}
         onClick={() => {
