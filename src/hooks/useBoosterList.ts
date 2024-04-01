@@ -2,8 +2,9 @@ import _ from 'lodash';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { Booster, BoosterCard, BoosterType, CollectionCard, Preferences, Rarity, defaults } from '../state';
-import { useCardCollection } from './useCardCollection';
+import { useCardList } from './useCardList';
 import { usePreferences } from './usePreferences';
+import { useSourceType } from './useSourceType';
 
 type BoosterPart = {
   count: number;
@@ -38,9 +39,9 @@ const boosterPartListByType: { [key in BoosterType]: BoosterPart[] } = {
 const getMatchingCardList = (
   preferences: Preferences,
   boosterPart: BoosterPart,
-  cardCollection: CollectionCard[],
+  cardList: CollectionCard[],
 ): CollectionCard[] =>
-  cardCollection.filter((card) => {
+  cardList.filter((card) => {
     const setNameList = boosterPart.setName ? [boosterPart.setName] : preferences.expansionSetNameList;
     const matchPreferences = setNameList.length === 0 || setNameList.includes(card.setName);
     const matchRarity = boosterPart.rarity === undefined || boosterPart.rarity.includes(card.rarity);
@@ -51,22 +52,22 @@ const getMatchingCardList = (
 const generateBoosterPart = (
   preferences: Preferences,
   boosterPart: BoosterPart,
-  cardCollection: CollectionCard[],
-): { boosterCardList: BoosterCard[]; cardCollectionNew: CollectionCard[] } => {
-  const emptyBooster = { boosterCardList: [], cardCollectionNew: cardCollection };
+  cardList: CollectionCard[],
+): { boosterCardList: BoosterCard[]; cardListNew: CollectionCard[] } => {
+  const emptyBooster = { boosterCardList: [], cardListNew: cardList };
   if (boosterPart.chancePercent !== undefined && Math.random() > boosterPart.chancePercent) {
     return emptyBooster;
   }
 
-  const { boosterCardList: replacementCardList, cardCollectionNew: cardCollectionNoReplacement } =
+  const { boosterCardList: replacementCardList, cardListNew: cardListNoReplacement } =
     boosterPart.replacement !== undefined
-      ? generateBoosterPart(preferences, boosterPart.replacement, cardCollection)
+      ? generateBoosterPart(preferences, boosterPart.replacement, cardList)
       : emptyBooster;
-  const matchingCardList = getMatchingCardList(preferences, boosterPart, cardCollectionNoReplacement);
+  const matchingCardList = getMatchingCardList(preferences, boosterPart, cardListNoReplacement);
 
   const boosterCardCount = boosterPart.count - replacementCardList.length;
   const boosterCardList = _.sampleSize(matchingCardList, boosterCardCount);
-  const cardCollectionNoBooster = cardCollectionNoReplacement.map((card) => {
+  const cardListNoBoosterPart = cardListNoReplacement.map((card) => {
     return boosterCardList.includes(card) ? { ...card, quantity: --card.quantity } : card;
   });
 
@@ -76,53 +77,54 @@ const generateBoosterPart = (
       imgUrlList: card.imgUrlList,
       dataUrl: card.dataUrl,
     })),
-    cardCollectionNew: cardCollectionNoBooster,
+    cardListNew: cardListNoBoosterPart,
   };
 };
 
 const generateBooster = (
   preferences: Preferences,
   boosterPartList: BoosterPart[],
-  cardCollection: CollectionCard[],
-): { boosterCardList: BoosterCard[]; cardCollectionNew: CollectionCard[] } => {
-  let cardCollectionNew: CollectionCard[] = cardCollection;
+  cardList: CollectionCard[],
+): { boosterCardList: BoosterCard[]; cardListNew: CollectionCard[] } => {
+  let cardListNew: CollectionCard[] = cardList;
   let boosterCardList: BoosterCard[] = [];
   boosterPartList.forEach((boosterPart) => {
-    const boosterPartGenerated = generateBoosterPart(preferences, boosterPart, cardCollectionNew);
+    const boosterPartGenerated = generateBoosterPart(preferences, boosterPart, cardListNew);
     boosterCardList = boosterCardList.concat(boosterPartGenerated.boosterCardList);
-    cardCollectionNew = boosterPartGenerated.cardCollectionNew;
+    cardListNew = boosterPartGenerated.cardListNew;
   });
 
-  return { boosterCardList, cardCollectionNew };
+  return { boosterCardList, cardListNew };
 };
 
-const generateBoosterList = (preferences: Preferences, cardCollection: CollectionCard[]): Booster[] => {
+const generateBoosterList = (preferences: Preferences, cardList: CollectionCard[]): Booster[] => {
   const boosterPartList = boosterPartListByType[preferences.boosterType];
-  let cardCollectionNew: CollectionCard[] = cardCollection;
+  let cardListNew: CollectionCard[] = cardList;
   let boosterList: Booster[] = [];
   for (let i = 0; i < preferences.boosterCount; i++) {
-    const boosterGenerated = generateBooster(preferences, boosterPartList, cardCollectionNew);
+    const boosterGenerated = generateBooster(preferences, boosterPartList, cardListNew);
     boosterList = boosterList.concat([{ cardList: boosterGenerated.boosterCardList }]);
-    cardCollectionNew = boosterGenerated.cardCollectionNew;
+    cardListNew = boosterGenerated.cardListNew;
   }
 
   return boosterList;
 };
 
-export const useCardBoosterList = () => {
-  const [cardBoosterList, setCardBoosterList] = useLocalStorage('cardBoosterList', defaults.boosterList);
+export const useBoosterList = () => {
+  const [boosterList, setBoosterList] = useLocalStorage('boosterList', defaults.boosterListBySource);
+  const { sourceType } = useSourceType();
   const { preferences } = usePreferences();
-  const { cardCollection } = useCardCollection();
+  const { cardList } = useCardList();
 
-  const resetCardBoosterList = () => setCardBoosterList([]);
+  const resetBoosterList = () => setBoosterList({ ...boosterList, [sourceType]: [] });
 
   return {
-    cardBoosterList,
-    generateCardBoosterList: () => {
-      resetCardBoosterList();
-      const boosterList = generateBoosterList(preferences, _.cloneDeep(cardCollection));
-      setCardBoosterList(boosterList);
+    boosterList: boosterList[sourceType],
+    generateBoosterList: () => {
+      resetBoosterList();
+      const boosterListForSource = generateBoosterList(preferences, _.cloneDeep(cardList));
+      setBoosterList({ ...boosterList, [sourceType]: boosterListForSource });
     },
-    resetCardBoosterList,
+    resetBoosterList,
   };
 };

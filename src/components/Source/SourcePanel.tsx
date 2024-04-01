@@ -1,9 +1,10 @@
+import Badge from 'react-bootstrap/Badge';
 import Card from 'react-bootstrap/Card';
-import CardBody from 'react-bootstrap/CardBody';
-import CardHeader from 'react-bootstrap/CardHeader';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
+import ProgressBar from 'react-bootstrap/ProgressBar';
 
+import { useSearchProgress } from '../../hooks/useSearchProgress';
 import { useSourceType } from '../../hooks/useSourceType';
 import { SourceType } from '../../state';
 import SourceDeckboxFileForm from './SourceDeckboxFileForm';
@@ -26,17 +27,34 @@ const renderSourceForm = (sourceType: SourceType | null) => {
   throw new Error('Unhandled collection source!');
 };
 
+const renderProgress = (progress: number) => {
+  if (progress === 0) {
+    return (
+      <Badge bg="warning" text="dark">
+        UNFETCHED
+      </Badge>
+    );
+  }
+  if (progress === 100) {
+    return <Badge bg="success">FETCHED</Badge>;
+  }
+
+  return <ProgressBar now={progress} label={`${progress}%`} visuallyHidden />;
+};
+
 const SourcePanel: React.FC = () => {
   const { sourceType, setSourceType } = useSourceType();
+  const { searchProgress, isInProgress } = useSearchProgress();
 
   return (
     <Card style={{ minHeight: '36rem' }}>
-      <CardHeader>Source</CardHeader>
-      <CardBody>
+      <Card.Header>Source</Card.Header>
+      <Card.Body>
         <Form>
           <FloatingLabel className="mb-3" label="Source">
             <Form.Select
               aria-label="Source"
+              disabled={isInProgress()}
               value={sourceType as string}
               onChange={(event) => setSourceType(event.currentTarget.value as SourceType)}
             >
@@ -49,7 +67,8 @@ const SourcePanel: React.FC = () => {
           </FloatingLabel>
           {renderSourceForm(sourceType)}
         </Form>
-      </CardBody>
+      </Card.Body>
+      <Card.Footer>{renderProgress(searchProgress)}</Card.Footer>
     </Card>
   );
 };

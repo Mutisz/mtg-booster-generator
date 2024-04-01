@@ -66,8 +66,21 @@ export type Booster = {
 export type Defaults = {
   source: Source;
   preferences: Preferences;
-  collection: CollectionCard[];
-  boosterList: Booster[];
+  searchProgressBySource: { [key in SourceType]: number };
+  cardListBySource: { [key in SourceType]: CollectionCard[] };
+  boosterListBySource: { [key in SourceType]: Booster[] };
+};
+
+const defaultProgressBySource = {
+  [SourceType.MoxfieldApi]: 0,
+  [SourceType.MoxfieldFile]: 0,
+  [SourceType.DeckboxFile]: 0,
+};
+
+const defaultListBySource = {
+  [SourceType.MoxfieldApi]: [],
+  [SourceType.MoxfieldFile]: [],
+  [SourceType.DeckboxFile]: [],
 };
 
 export const defaults: Defaults = {
@@ -81,6 +94,7 @@ export const defaults: Defaults = {
     expansionSetNameList: [],
     balanceColors: true,
   },
-  collection: [],
-  boosterList: [],
+  searchProgressBySource: defaultProgressBySource,
+  cardListBySource: defaultListBySource,
+  boosterListBySource: defaultListBySource,
 };

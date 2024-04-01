@@ -5,8 +5,8 @@ import CardHeader from 'react-bootstrap/CardHeader';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 
-import { useCardBoosterList } from '../../hooks/useCardBoosterList';
-import { useCardCollection } from '../../hooks/useCardCollection';
+import { useBoosterList } from '../../hooks/useBoosterList';
+import { useCardList } from '../../hooks/useCardList';
 import { usePreferences } from '../../hooks/usePreferences';
 import { BoosterType } from '../../state';
 
@@ -14,9 +14,9 @@ const minBoosterCount = 1;
 const maxBoosterCount = 12;
 
 const useExpansionSetNameList = () => {
-  const { cardCollection } = useCardCollection();
+  const { cardList } = useCardList();
 
-  return cardCollection.reduce<string[]>((acc, value) => {
+  return cardList.reduce<string[]>((acc, value) => {
     const expansionSetName = value.setName;
     if (acc.includes(expansionSetName) === false) {
       acc.push(expansionSetName);
@@ -28,8 +28,8 @@ const useExpansionSetNameList = () => {
 
 const PreferencesPanel: React.FC = () => {
   const { preferences, setPreferences } = usePreferences();
-  const { cardCollection } = useCardCollection();
-  const { cardBoosterList, generateCardBoosterList } = useCardBoosterList();
+  const { cardList } = useCardList();
+  const { boosterList, generateBoosterList } = useBoosterList();
   const expansionSetNameList = useExpansionSetNameList();
 
   return (
@@ -97,9 +97,9 @@ const PreferencesPanel: React.FC = () => {
             />
           </Form.Group>
           <Button
-            variant={cardBoosterList.length === 0 ? 'primary' : 'success'}
-            disabled={cardCollection.length === 0}
-            onClick={generateCardBoosterList}
+            variant={boosterList.length === 0 ? 'primary' : 'success'}
+            disabled={cardList.length === 0}
+            onClick={generateBoosterList}
           >
             Generate boosters
           </Button>

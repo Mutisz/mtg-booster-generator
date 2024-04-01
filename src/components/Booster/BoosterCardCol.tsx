@@ -17,11 +17,16 @@ const BoosterCardCol: React.FC<{ card: BoosterCard }> = ({ card }) => {
   const imgUrl = card.imgUrlList ? card.imgUrlList[imgUrlIndex] : null;
 
   return (
-    <Col>
-      <Card style={{ width: '12rem', minHeight: '24rem' }}>
+    <Col style={{ flexGrow: 0 }}>
+      <Card style={{ width: '18rem' }}>
         {imgUrl ? <Card.Img variant="top" src={imgUrl} alt={card.cardName} /> : <></>}
         <Card.Body>
-          <Card.Title>{card.cardName}</Card.Title>
+          <Card.Title
+            style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}
+            title={card.cardName}
+          >
+            {card.cardName}
+          </Card.Title>
           <Card.Text>
             {imgUrlListLength > 1 ? (
               <Button variant="link" onClick={incrementImgUrlIndex}>

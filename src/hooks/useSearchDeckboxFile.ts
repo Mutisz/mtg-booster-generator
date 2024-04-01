@@ -1,12 +1,15 @@
 import csv from 'csvtojson';
 import { useCallback } from 'react';
+import { useErrorBoundary } from 'react-error-boundary';
 
-import { CollectionCard, Rarity } from '../state';
+import { CollectionSearchError } from '../errors/CollectionSearchError';
+import { CollectionCard, Rarity, SourceType } from '../state';
 import { removeBasicLand } from '../util/removeBasicLand';
-import { useCardBoosterList } from './useCardBoosterList';
-import { useCardCollection } from './useCardCollection';
+import { useBoosterList } from './useBoosterList';
+import { useCardList } from './useCardList';
+import { useSearchProgress } from './useSearchProgress';
 
-type CollectionCardData = {
+type FileCardData = {
   Count: string;
   Name: string;
   Edition: string;
@@ -28,31 +31,54 @@ const rarityMap: { [key: string]: Rarity } = {
 
 const getRarity = (rarity: string): Rarity => rarityMap[rarity] ?? Rarity.Other;
 
+const parseFile = async (setProgress: (progress: number) => void, file: File): Promise<CollectionCard[]> => {
+  const fileString = await file.text();
+  setProgress(33); // 1 of 3 steps
+
+  const fileData = await csv().fromString(fileString);
+  setProgress(66); // 2 of 3 steps
+
+  return (fileData as FileCardData[]).map((cardData) => ({
+    quantity: parseInt(cardData.Count),
+    setName: cardData.Edition,
+    cardName: cardData.Name,
+    type: cardData.Type,
+    rarity: getRarity(cardData.Rarity),
+    imgUrlList: [cardData['Image URL']],
+    dataUrl: `${dataUrl}/${cardData.Name}?printing=${cardData['Printing Id']}`,
+  }));
+};
+
 export const useSearchDeckboxFile = () => {
-  const { cardCollection, setCardCollection } = useCardCollection();
-  const { resetCardBoosterList } = useCardBoosterList();
+  const { searchProgress, setSearchProgress } = useSearchProgress();
+  const { showBoundary } = useErrorBoundary<Error>();
+  const { setCardList, resetCardList } = useCardList();
+  const { resetBoosterList } = useBoosterList();
 
-  const searchAndUpdate = useCallback(async (file: File) => {
-    setCardCollection([]);
-    resetCardBoosterList();
+  const tryParseFile = async (file: File) => {
+    try {
+      resetCardList();
+      resetBoosterList();
+      const cardListNew = await parseFile(setSearchProgress, file);
+      setCardList(removeBasicLand(cardListNew));
+      setSearchProgress(100);
+    } catch (error) {
+      setSearchProgress(0);
+      showBoundary(
+        new CollectionSearchError(
+          (error as Error).message,
+          SourceType.DeckboxFile,
+          'Please make sure that required columns are present in imported file.',
+        ),
+      );
+    }
+  };
 
-    const collectionFileString = await file.text();
-    const collectionFileData = await csv().fromString(collectionFileString);
-    const collectionNew: CollectionCard[] = (collectionFileData as CollectionCardData[]).map((cardData) => ({
-      quantity: parseInt(cardData.Count),
-      setName: cardData.Edition,
-      cardName: cardData.Name,
-      type: cardData.Type,
-      rarity: getRarity(cardData.Rarity),
-      imgUrlList: [cardData['Image URL']],
-      dataUrl: `${dataUrl}/${cardData.Name}?printing=${cardData['Printing Id']}`,
-    }));
-
-    setCardCollection(removeBasicLand(collectionNew));
+  const searchDeckboxFile = useCallback(async (file: File) => {
+    if (searchProgress === 0 || searchProgress === 100) {
+      await tryParseFile(file);
+    }
   }, []);
 
-  return {
-    cardCollection,
-    searchAndUpdate,
-  };
+  return searchDeckboxFile;
 };

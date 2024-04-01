@@ -4,9 +4,11 @@ import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 
 import { useSearchDeckboxFile } from '../../hooks/useSearchDeckboxFile';
+import { useSearchProgress } from '../../hooks/useSearchProgress';
 
 const SourceDeckboxFileForm: React.FC = () => {
-  const { searchAndUpdate } = useSearchDeckboxFile();
+  const { isInProgress } = useSearchProgress();
+  const searchDeckboxFile = useSearchDeckboxFile();
 
   return (
     <>
@@ -15,13 +17,14 @@ const SourceDeckboxFileForm: React.FC = () => {
           aria-label="Bearer token"
           type="file"
           accept=".csv"
+          disabled={isInProgress()}
           onChange={(event: ChangeEvent<HTMLInputElement>) => {
             const file = event.currentTarget.files ? event.currentTarget.files[0] : null;
             if (file === null) {
               throw new Error('No Deckbox file provided!');
             }
 
-            void searchAndUpdate(file);
+            void searchDeckboxFile(file);
           }}
         />
       </FloatingLabel>

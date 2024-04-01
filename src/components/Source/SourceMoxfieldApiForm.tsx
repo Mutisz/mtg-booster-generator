@@ -3,17 +3,18 @@ import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
-import ProgressBar from 'react-bootstrap/ProgressBar';
 
 import { usePreferences } from '../../hooks/usePreferences';
-import { useSearchMoxfield } from '../../hooks/useSearchMoxfield';
+import { useSearchMoxfieldApi } from '../../hooks/useSearchMoxfieldApi';
+import { useSearchProgress } from '../../hooks/useSearchProgress';
 import { useSourceMoxfield } from '../../hooks/useSourceMoxfield';
 import { defaults } from '../../state';
 
 const SourceMoxfieldApiForm: React.FC = () => {
   const { sourceMoxfield, setSourceMoxfield } = useSourceMoxfield();
   const { preferences, setPreferences } = usePreferences();
-  const { cardCollectionProgress, cardCollection, searchAndUpdate } = useSearchMoxfield();
+  const { isInProgress } = useSearchProgress();
+  const searchMoxfieldApi = useSearchMoxfieldApi();
 
   return (
     <>
@@ -39,20 +40,16 @@ const SourceMoxfieldApiForm: React.FC = () => {
           .
         </p>
       </Alert>
-      {cardCollectionProgress === 0 ? (
-        <Button
-          variant={cardCollection.length === 0 ? 'primary' : 'success'}
-          disabled={sourceMoxfield.bearerToken === ''}
-          onClick={() => {
-            setPreferences({ ...preferences, expansionSetNameList: defaults.preferences.expansionSetNameList });
-            void searchAndUpdate();
-          }}
-        >
-          Fetch collection
-        </Button>
-      ) : (
-        <ProgressBar now={cardCollectionProgress} label={`${cardCollectionProgress}%`} visuallyHidden />
-      )}
+      <Button
+        variant={'primary'}
+        disabled={sourceMoxfield.bearerToken === '' || isInProgress()}
+        onClick={() => {
+          setPreferences({ ...preferences, expansionSetNameList: defaults.preferences.expansionSetNameList });
+          void searchMoxfieldApi();
+        }}
+      >
+        Fetch collection
+      </Button>
     </>
   );
 };

@@ -4,7 +4,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { useCardBoosterList } from '../hooks/useCardBoosterList';
+import { useBoosterList } from '../hooks/useBoosterList';
 import { usePreferences } from '../hooks/usePreferences';
 import { useSourceType } from '../hooks/useSourceType';
 import { defaults } from '../state';
@@ -16,7 +16,7 @@ import SourcePanel from './Source/SourcePanel';
 const App: React.FC = () => {
   const { setSourceType } = useSourceType();
   const { setPreferences } = usePreferences();
-  const { resetCardBoosterList } = useCardBoosterList();
+  const { resetBoosterList } = useBoosterList();
 
   return (
     <Container className="container-fluid">
@@ -52,7 +52,7 @@ const App: React.FC = () => {
         </Row>
       </Container>
       <Container className="my-4">
-        <ErrorBoundary FallbackComponent={ErrorDismissible} onReset={() => resetCardBoosterList()}>
+        <ErrorBoundary FallbackComponent={ErrorDismissible} onReset={() => resetBoosterList()}>
           <BoosterPanel />
         </ErrorBoundary>
       </Container>

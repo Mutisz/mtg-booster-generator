@@ -1,11 +1,12 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useErrorBoundary } from 'react-error-boundary';
 
 import { CollectionSearchError } from '../errors/CollectionSearchError';
 import { CollectionCard, ManaColor, Rarity, SourceType } from '../state';
 import { removeBasicLand } from '../util/removeBasicLand';
-import { useCardBoosterList } from './useCardBoosterList';
-import { useCardCollection } from './useCardCollection';
+import { useBoosterList } from './useBoosterList';
+import { useCardList } from './useCardList';
+import { useSearchProgress } from './useSearchProgress';
 import { useSourceMoxfield } from './useSourceMoxfield';
 
 type CollectionPageData = {
@@ -71,7 +72,7 @@ const fetchCollectionPage = async (
   setProgress: (progress: number) => void,
   bearerToken: string,
   page: number = 1,
-  collection: CollectionCard[] = [],
+  cardList: CollectionCard[] = [],
 ): Promise<CollectionCard[]> => {
   const collectionPageResponse = await fetch(`${searchUrl}&pageNumber=${page}`, {
     credentials: 'include',
@@ -84,8 +85,8 @@ const fetchCollectionPage = async (
   }
 
   const collectionPage = (await collectionPageResponse.json()) as CollectionPageData;
-  const collectionNew = [
-    ...collection,
+  const cardListNew = [
+    ...cardList,
     ...collectionPage.data.map((cardData) => ({
       quantity: cardData.quantity,
       setName: cardData.card.set_name,
@@ -101,24 +102,26 @@ const fetchCollectionPage = async (
   setProgress((page / collectionPage.totalPages) * 100);
 
   return page !== collectionPage.totalPages
-    ? fetchCollectionPage(setProgress, bearerToken, ++page, collectionNew)
-    : collectionNew;
+    ? fetchCollectionPage(setProgress, bearerToken, ++page, cardListNew)
+    : cardListNew;
 };
 
-export const useSearchMoxfield = () => {
-  const [progress, setProgress] = useState<number>(0);
+export const useSearchMoxfieldApi = () => {
+  const { searchProgress, setSearchProgress } = useSearchProgress();
   const { showBoundary } = useErrorBoundary<Error>();
   const { sourceMoxfield } = useSourceMoxfield();
-  const { cardCollection, setCardCollection } = useCardCollection();
-  const { resetCardBoosterList } = useCardBoosterList();
+  const { setCardList, resetCardList } = useCardList();
+  const { resetBoosterList } = useBoosterList();
 
-  const fetchCollection = async () => {
+  const tryFetchCollection = async () => {
     try {
-      setCardCollection([]);
-      resetCardBoosterList();
-      const newCardCollection = await fetchCollectionPage(setProgress, sourceMoxfield.bearerToken);
-      setCardCollection(removeBasicLand(newCardCollection));
+      resetCardList();
+      resetBoosterList();
+      const cardListNew = await fetchCollectionPage(setSearchProgress, sourceMoxfield.bearerToken);
+      setCardList(removeBasicLand(cardListNew));
+      setSearchProgress(100);
     } catch (error) {
+      setSearchProgress(0);
       showBoundary(
         new CollectionSearchError(
           (error as Error).message,
@@ -129,16 +132,11 @@ export const useSearchMoxfield = () => {
     }
   };
 
-  const searchAndUpdate = useCallback(async () => {
-    if (progress === 0) {
-      await fetchCollection();
-      setProgress(0);
+  const searchMoxfieldApi = useCallback(async () => {
+    if (searchProgress === 0 || searchProgress === 100) {
+      await tryFetchCollection();
     }
   }, []);
 
-  return {
-    cardCollectionProgress: progress,
-    cardCollection,
-    searchAndUpdate,
-  };
+  return searchMoxfieldApi;
 };
