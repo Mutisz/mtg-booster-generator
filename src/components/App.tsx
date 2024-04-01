@@ -5,16 +5,16 @@ import Row from 'react-bootstrap/Row';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { useCardBoosterList } from '../hooks/useCardBoosterList';
-import { useCredentialsSource } from '../hooks/useCredentialsSource';
 import { usePreferences } from '../hooks/usePreferences';
+import { useSourceType } from '../hooks/useSourceType';
 import { defaults } from '../state';
 import ErrorDismissible from './Alert/ErrorDismissible';
 import BoosterPanel from './Booster/BoosterPanel';
-import CredentialsPanel from './Credentials/CredentialsPanel';
 import PreferencesPanel from './Preferences/PreferencesPanel';
+import SourcePanel from './Source/SourcePanel';
 
 const App: React.FC = () => {
-  const { setSource } = useCredentialsSource();
+  const { setSourceType } = useSourceType();
   const { setPreferences } = usePreferences();
   const { resetCardBoosterList } = useCardBoosterList();
 
@@ -40,8 +40,8 @@ const App: React.FC = () => {
       <Container className="my-4">
         <Row className="gy-4">
           <Col md={6}>
-            <ErrorBoundary FallbackComponent={ErrorDismissible} onReset={() => setSource(defaults.credentials.source)}>
-              <CredentialsPanel />
+            <ErrorBoundary FallbackComponent={ErrorDismissible} onReset={() => setSourceType(defaults.source.type)}>
+              <SourcePanel />
             </ErrorBoundary>
           </Col>
           <Col md={6}>

@@ -5,7 +5,7 @@ import Form from 'react-bootstrap/Form';
 
 import { useSearchDeckboxFile } from '../../hooks/useSearchDeckboxFile';
 
-const CredentialsDeckboxFileForm: React.FC = () => {
+const SourceDeckboxFileForm: React.FC = () => {
   const { searchAndUpdate } = useSearchDeckboxFile();
 
   return (
@@ -42,4 +42,4 @@ const CredentialsDeckboxFileForm: React.FC = () => {
   );
 };
 
-export default CredentialsDeckboxFileForm;
+export default SourceDeckboxFileForm;

@@ -5,13 +5,13 @@ import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 
-import { useCredentialsMoxfield } from '../../hooks/useCredentialsMoxfield';
 import { usePreferences } from '../../hooks/usePreferences';
 import { useSearchMoxfield } from '../../hooks/useSearchMoxfield';
+import { useSourceMoxfield } from '../../hooks/useSourceMoxfield';
 import { defaults } from '../../state';
 
-const CredentialsMoxfieldForm: React.FC = () => {
-  const { credentialsMoxfield, setCredentialsMoxfield } = useCredentialsMoxfield();
+const SourceMoxfieldApiForm: React.FC = () => {
+  const { sourceMoxfield, setSourceMoxfield } = useSourceMoxfield();
   const { preferences, setPreferences } = usePreferences();
   const { cardCollectionProgress, cardCollection, searchAndUpdate } = useSearchMoxfield();
 
@@ -21,8 +21,8 @@ const CredentialsMoxfieldForm: React.FC = () => {
         <Form.Control
           aria-label="Bearer token"
           type="text"
-          value={credentialsMoxfield.bearerToken}
-          onChange={(event) => setCredentialsMoxfield({ bearerToken: event.currentTarget.value })}
+          value={sourceMoxfield.bearerToken}
+          onChange={(event) => setSourceMoxfield({ bearerToken: event.currentTarget.value })}
         />
       </FloatingLabel>
       <Alert variant="primary">
@@ -42,7 +42,7 @@ const CredentialsMoxfieldForm: React.FC = () => {
       {cardCollectionProgress === 0 ? (
         <Button
           variant={cardCollection.length === 0 ? 'primary' : 'success'}
-          disabled={credentialsMoxfield.bearerToken === ''}
+          disabled={sourceMoxfield.bearerToken === ''}
           onClick={() => {
             setPreferences({ ...preferences, expansionSetNameList: defaults.preferences.expansionSetNameList });
             void searchAndUpdate();
@@ -57,4 +57,4 @@ const CredentialsMoxfieldForm: React.FC = () => {
   );
 };
 
-export default CredentialsMoxfieldForm;
+export default SourceMoxfieldApiForm;

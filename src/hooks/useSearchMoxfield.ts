@@ -2,11 +2,11 @@ import { useCallback, useState } from 'react';
 import { useErrorBoundary } from 'react-error-boundary';
 
 import { CollectionSearchError } from '../errors/CollectionSearchError';
-import { CollectionCard, ManaColor, Rarity, Source } from '../state';
+import { CollectionCard, ManaColor, Rarity, SourceType } from '../state';
 import { removeBasicLand } from '../util/removeBasicLand';
 import { useCardBoosterList } from './useCardBoosterList';
 import { useCardCollection } from './useCardCollection';
-import { useCredentialsMoxfield } from './useCredentialsMoxfield';
+import { useSourceMoxfield } from './useSourceMoxfield';
 
 type CollectionPageData = {
   totalPages: number;
@@ -108,7 +108,7 @@ const fetchCollectionPage = async (
 export const useSearchMoxfield = () => {
   const [progress, setProgress] = useState<number>(0);
   const { showBoundary } = useErrorBoundary<Error>();
-  const { credentialsMoxfield } = useCredentialsMoxfield();
+  const { sourceMoxfield } = useSourceMoxfield();
   const { cardCollection, setCardCollection } = useCardCollection();
   const { resetCardBoosterList } = useCardBoosterList();
 
@@ -116,13 +116,13 @@ export const useSearchMoxfield = () => {
     try {
       setCardCollection([]);
       resetCardBoosterList();
-      const newCardCollection = await fetchCollectionPage(setProgress, credentialsMoxfield.bearerToken);
+      const newCardCollection = await fetchCollectionPage(setProgress, sourceMoxfield.bearerToken);
       setCardCollection(removeBasicLand(newCardCollection));
     } catch (error) {
       showBoundary(
         new CollectionSearchError(
           (error as Error).message,
-          Source.MoxfieldApi,
+          SourceType.MoxfieldApi,
           'Please make sure that bearer token is valid and CORS is disabled as per instructions.',
         ),
       );

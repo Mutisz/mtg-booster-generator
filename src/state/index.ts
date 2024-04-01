@@ -1,18 +1,16 @@
-export enum Source {
+export enum SourceType {
   MoxfieldApi = 'MoxfieldApi',
   MoxfieldFile = 'MoxfieldFile',
   DeckboxFile = 'DeckboxFile',
 }
 
-export type CredentialsMoxfield = {
+export type SourceMoxfield = {
   bearerToken: string;
 };
 
-export type Preferences = {
-  boosterType: BoosterType;
-  boosterCount: number;
-  expansionSetNameList: string[];
-  balanceColors: boolean;
+export type Source = {
+  type: SourceType;
+  moxfield: SourceMoxfield;
 };
 
 export enum BoosterType {
@@ -37,6 +35,13 @@ export enum ManaColor {
   White = 'White',
 }
 
+export type Preferences = {
+  boosterType: BoosterType;
+  boosterCount: number;
+  expansionSetNameList: string[];
+  balanceColors: boolean;
+};
+
 export type CollectionCard = {
   quantity: number;
   setName: string;
@@ -59,18 +64,15 @@ export type Booster = {
 };
 
 export type Defaults = {
-  credentials: {
-    source: Source;
-    moxfield: CredentialsMoxfield;
-  };
+  source: Source;
   preferences: Preferences;
   collection: CollectionCard[];
   boosterList: Booster[];
 };
 
 export const defaults: Defaults = {
-  credentials: {
-    source: Source.MoxfieldApi,
+  source: {
+    type: SourceType.MoxfieldApi,
     moxfield: { bearerToken: '' },
   },
   preferences: {
