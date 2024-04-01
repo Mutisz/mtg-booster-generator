@@ -107,7 +107,7 @@ const fetchCollectionPage = async (
 };
 
 export const useSearchMoxfieldApi = () => {
-  const { searchProgress, setSearchProgress } = useSearchProgress();
+  const { isInProgress, setSearchProgress } = useSearchProgress();
   const { showBoundary } = useErrorBoundary<Error>();
   const { sourceMoxfield } = useSourceMoxfield();
   const { setCardList, resetCardList } = useCardList();
@@ -133,7 +133,7 @@ export const useSearchMoxfieldApi = () => {
   };
 
   const searchMoxfieldApi = useCallback(async () => {
-    if (searchProgress === 0 || searchProgress === 100) {
+    if (isInProgress() === false) {
       await tryFetchCollection();
     }
   }, []);

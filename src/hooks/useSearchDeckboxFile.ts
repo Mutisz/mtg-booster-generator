@@ -50,7 +50,7 @@ const parseFile = async (setProgress: (progress: number) => void, file: File): P
 };
 
 export const useSearchDeckboxFile = () => {
-  const { searchProgress, setSearchProgress } = useSearchProgress();
+  const { isInProgress, setSearchProgress } = useSearchProgress();
   const { showBoundary } = useErrorBoundary<Error>();
   const { setCardList, resetCardList } = useCardList();
   const { resetBoosterList } = useBoosterList();
@@ -75,7 +75,7 @@ export const useSearchDeckboxFile = () => {
   };
 
   const searchDeckboxFile = useCallback(async (file: File) => {
-    if (searchProgress === 0 || searchProgress === 100) {
+    if (isInProgress() === false) {
       await tryParseFile(file);
     }
   }, []);
