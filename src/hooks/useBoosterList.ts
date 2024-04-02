@@ -1,4 +1,4 @@
-import { cloneDeep, sample, sampleSize, shuffle } from 'lodash';
+import { cloneDeep, concat, sample, sampleSize, shuffle } from 'lodash';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { Booster, BoosterCard, BoosterType, CollectionCard, ManaColor, Preferences, Rarity, defaults } from '../state';
@@ -131,12 +131,16 @@ const generateBoosterPart = (
     ? randomizeCardListBalancingColor(preferences, boosterPart, boosterCardCount, cardList, colorRotation)
     : randomizeCardList(preferences, boosterPart, boosterCardCount, cardList);
 
-  return selectedCardList.map((card) => ({
-    cardName: card.cardName,
-    colorList: card.colorList,
-    imgUrlList: card.imgUrlList,
-    dataUrl: card.dataUrl,
-  }));
+  return concat(
+    selectedCardList.map(
+      (card) => ({
+        cardName: card.cardName,
+        imgUrlList: card.imgUrlList,
+        dataUrl: card.dataUrl,
+      }),
+      replacementBoosterCardList,
+    ),
+  );
 };
 
 const generateBooster = (
