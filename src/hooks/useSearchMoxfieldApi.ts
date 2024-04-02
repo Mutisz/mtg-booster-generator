@@ -93,7 +93,7 @@ const fetchCollectionPage = async (
       cardName: cardData.card.name,
       type: cardData.card.type_line,
       rarity: getRarity(cardData.card.rarity),
-      color: getManaColorList(cardData.card.color_identity),
+      colorList: getManaColorList(cardData.card.color_identity),
       imgUrlList: getImgUrlList(cardData),
       dataUrl: getDataUrl(cardData),
     })),

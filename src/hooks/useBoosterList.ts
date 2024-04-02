@@ -1,7 +1,7 @@
-import _ from 'lodash';
+import { cloneDeep, sample, sampleSize, shuffle } from 'lodash';
 import { useLocalStorage } from 'usehooks-ts';
 
-import { Booster, BoosterCard, BoosterType, CollectionCard, Preferences, Rarity, defaults } from '../state';
+import { Booster, BoosterCard, BoosterType, CollectionCard, ManaColor, Preferences, Rarity, defaults } from '../state';
 import { useCardList } from './useCardList';
 import { usePreferences } from './usePreferences';
 import { useSourceType } from './useSourceType';
@@ -40,71 +40,126 @@ const getMatchingCardList = (
   preferences: Preferences,
   boosterPart: BoosterPart,
   cardList: CollectionCard[],
+  color: ManaColor | null = null,
 ): CollectionCard[] =>
   cardList.filter((card) => {
     const setNameList = boosterPart.setName ? [boosterPart.setName] : preferences.expansionSetNameList;
+    const cardColorList = card.colorList ?? [];
+
     const matchPreferences = setNameList.length === 0 || setNameList.includes(card.setName);
     const matchRarity = boosterPart.rarity === undefined || boosterPart.rarity.includes(card.rarity);
+    const matchColor = color === null || cardColorList.length === 0 || cardColorList.includes(color);
 
-    return card.quantity > 0 && matchPreferences && matchRarity;
+    return card.quantity > 0 && matchPreferences && matchRarity && matchColor;
   });
+
+const randomizeCardBalancingColor = (
+  preferences: Preferences,
+  boosterPart: BoosterPart,
+  cardList: CollectionCard[],
+  colorRotation: ManaColor[],
+): CollectionCard | null => {
+  while (colorRotation.length !== 0) {
+    const color = colorRotation.shift();
+    if (color === undefined) {
+      return null;
+    }
+
+    const colorCardList = getMatchingCardList(preferences, boosterPart, cardList, color);
+    const card = sample(colorCardList);
+    if (card !== undefined) {
+      card.quantity--;
+      colorRotation.push(color);
+      return card;
+    }
+  }
+
+  return null;
+};
+
+const randomizeCardListBalancingColor = (
+  preferences: Preferences,
+  boosterPart: BoosterPart,
+  boosterCardCount: number,
+  cardList: CollectionCard[],
+  colorRotation: ManaColor[],
+): CollectionCard[] => {
+  const selectedCardList: CollectionCard[] = [];
+  for (let i = 0; i < boosterCardCount; i++) {
+    const card = randomizeCardBalancingColor(preferences, boosterPart, cardList, colorRotation);
+    if (card === null) {
+      return selectedCardList;
+    }
+
+    selectedCardList.push(card);
+  }
+
+  return selectedCardList;
+};
+
+const randomizeCardList = (
+  preferences: Preferences,
+  boosterPart: BoosterPart,
+  boosterCardCount: number,
+  cardList: CollectionCard[],
+): CollectionCard[] => {
+  const matchingCardList = getMatchingCardList(preferences, boosterPart, cardList);
+
+  const selectedCardList = sampleSize(matchingCardList, boosterCardCount);
+  selectedCardList.forEach((card) => card.quantity--);
+
+  return selectedCardList;
+};
 
 const generateBoosterPart = (
   preferences: Preferences,
   boosterPart: BoosterPart,
   cardList: CollectionCard[],
-): { boosterCardList: BoosterCard[]; cardListNew: CollectionCard[] } => {
-  const emptyBooster = { boosterCardList: [], cardListNew: cardList };
+  colorRotation: ManaColor[],
+): BoosterCard[] => {
   if (boosterPart.chancePercent !== undefined && Math.random() > boosterPart.chancePercent) {
-    return emptyBooster;
+    return [];
   }
 
-  const { boosterCardList: replacementCardList, cardListNew: cardListNoReplacement } =
+  const replacementBoosterCardList =
     boosterPart.replacement !== undefined
-      ? generateBoosterPart(preferences, boosterPart.replacement, cardList)
-      : emptyBooster;
-  const matchingCardList = getMatchingCardList(preferences, boosterPart, cardListNoReplacement);
+      ? generateBoosterPart(preferences, boosterPart.replacement, cardList, colorRotation)
+      : [];
 
-  const boosterCardCount = boosterPart.count - replacementCardList.length;
-  const boosterCardList = _.sampleSize(matchingCardList, boosterCardCount);
-  const cardListNoBoosterPart = cardListNoReplacement.map((card) => {
-    return boosterCardList.includes(card) ? { ...card, quantity: --card.quantity } : card;
-  });
+  const boosterCardCount = boosterPart.count - replacementBoosterCardList.length;
+  const selectedCardList = preferences.balanceColors
+    ? randomizeCardListBalancingColor(preferences, boosterPart, boosterCardCount, cardList, colorRotation)
+    : randomizeCardList(preferences, boosterPart, boosterCardCount, cardList);
 
-  return {
-    boosterCardList: boosterCardList.map((card) => ({
-      cardName: card.cardName,
-      imgUrlList: card.imgUrlList,
-      dataUrl: card.dataUrl,
-    })),
-    cardListNew: cardListNoBoosterPart,
-  };
+  return selectedCardList.map((card) => ({
+    cardName: card.cardName,
+    colorList: card.colorList,
+    imgUrlList: card.imgUrlList,
+    dataUrl: card.dataUrl,
+  }));
 };
 
 const generateBooster = (
   preferences: Preferences,
   boosterPartList: BoosterPart[],
   cardList: CollectionCard[],
-): { boosterCardList: BoosterCard[]; cardListNew: CollectionCard[] } => {
-  let cardListNew: CollectionCard[] = cardList;
+): BoosterCard[] => {
   let boosterCardList: BoosterCard[] = [];
+  const colorRotation = shuffle(Object.values(ManaColor));
   boosterPartList.forEach((boosterPart) => {
-    const boosterPartGenerated = generateBoosterPart(preferences, boosterPart, cardListNew);
-    boosterCardList = boosterCardList.concat(boosterPartGenerated.boosterCardList);
-    cardListNew = boosterPartGenerated.cardListNew;
+    const boosterPartCardList = generateBoosterPart(preferences, boosterPart, cardList, colorRotation);
+    boosterCardList = boosterCardList.concat(boosterPartCardList);
   });
 
-  return { boosterCardList, cardListNew };
+  return boosterCardList;
 };
 
 const generateBoosterList = (preferences: Preferences, cardList: CollectionCard[]): Booster[] => {
   const boosterPartList = boosterPartListByType[preferences.boosterType];
-  let cardListNew: CollectionCard[] = cardList;
   let boosterList: Booster[] = [];
   for (let i = 0; i < preferences.boosterCount; i++) {
-    const boosterGenerated = generateBooster(preferences, boosterPartList, cardListNew);
-    boosterList = boosterList.concat([{ cardList: boosterGenerated.boosterCardList }]);
-    cardListNew = boosterGenerated.cardListNew;
+    const boosterCardList = generateBooster(preferences, boosterPartList, cardList);
+    boosterList = boosterList.concat([{ cardList: boosterCardList }]);
   }
 
   return boosterList;
@@ -122,7 +177,7 @@ export const useBoosterList = () => {
     boosterList: boosterList[sourceType],
     generateBoosterList: () => {
       resetBoosterList();
-      const boosterListForSource = generateBoosterList(preferences, _.cloneDeep(cardList));
+      const boosterListForSource = generateBoosterList(preferences, cloneDeep(cardList));
       setBoosterList({ ...boosterList, [sourceType]: boosterListForSource });
     },
     resetBoosterList,
