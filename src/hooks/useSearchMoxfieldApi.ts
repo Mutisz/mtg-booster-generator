@@ -18,6 +18,7 @@ type CollectionCardData = {
   quantity: number;
   card: {
     id: string;
+    set: string;
     set_name: string;
     name: string;
     type_line: string;
@@ -89,6 +90,7 @@ const fetchCollectionPage = async (
     ...cardList,
     ...collectionPage.data.map((cardData) => ({
       quantity: cardData.quantity,
+      setCode: cardData.card.set,
       setName: cardData.card.set_name,
       cardName: cardData.card.name,
       type: cardData.card.type_line,
@@ -107,13 +109,13 @@ const fetchCollectionPage = async (
 };
 
 export const useSearchMoxfieldApi = () => {
-  const { isInProgress, setSearchProgress } = useSearchProgress();
+  const { searchProgress, isInProgress, setSearchProgress } = useSearchProgress();
   const { showBoundary } = useErrorBoundary<Error>();
   const { sourceMoxfield } = useSourceMoxfield();
   const { setCardList, resetCardList } = useCardList();
   const { resetBoosterList } = useBoosterList();
 
-  const tryFetchCollection = async () => {
+  const trySearchMoxfieldApiCallback = async () => {
     try {
       resetCardList();
       resetBoosterList();
@@ -132,11 +134,11 @@ export const useSearchMoxfieldApi = () => {
     }
   };
 
-  const searchMoxfieldApi = useCallback(async () => {
+  const searchMoxfieldApiCallback = useCallback(async () => {
     if (isInProgress() === false) {
-      await tryFetchCollection();
+      await trySearchMoxfieldApiCallback();
     }
-  }, []);
+  }, [searchProgress, sourceMoxfield]);
 
-  return searchMoxfieldApi;
+  return searchMoxfieldApiCallback;
 };

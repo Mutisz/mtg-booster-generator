@@ -15,6 +15,7 @@ export type Source = {
 
 export enum BoosterType {
   Draft = 'Draft',
+  Jumpstart = 'Jumpstart',
   Play = 'Play',
   Set = 'Set',
 }
@@ -44,6 +45,7 @@ export type Preferences = {
 
 export type CollectionCard = {
   quantity: number;
+  setCode: string;
   setName: string;
   cardName: string;
   type: string;
@@ -61,6 +63,8 @@ export type BoosterCard = {
 
 export type Booster = {
   cardList: BoosterCard[];
+  type: BoosterType;
+  name?: string;
 };
 
 export type Defaults = {

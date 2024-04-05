@@ -13,6 +13,7 @@ type FileCardData = {
   Count: string;
   Name: string;
   Edition: string;
+  'Edition Code': string;
   'Printing Id': string;
   Type: string;
   Cost: string;
@@ -31,7 +32,7 @@ const rarityMap: { [key: string]: Rarity } = {
 
 const getRarity = (rarity: string): Rarity => rarityMap[rarity] ?? Rarity.Other;
 
-const parseFile = async (setProgress: (progress: number) => void, file: File): Promise<CollectionCard[]> => {
+const searchDeckboxFile = async (setProgress: (progress: number) => void, file: File): Promise<CollectionCard[]> => {
   const fileString = await file.text();
   setProgress(33); // 1 of 3 steps
 
@@ -41,6 +42,7 @@ const parseFile = async (setProgress: (progress: number) => void, file: File): P
   return (fileData as FileCardData[]).map((cardData) => ({
     quantity: parseInt(cardData.Count),
     setName: cardData.Edition,
+    setCode: cardData['Edition Code'],
     cardName: cardData.Name,
     type: cardData.Type,
     rarity: getRarity(cardData.Rarity),
@@ -50,16 +52,16 @@ const parseFile = async (setProgress: (progress: number) => void, file: File): P
 };
 
 export const useSearchDeckboxFile = () => {
-  const { isInProgress, setSearchProgress } = useSearchProgress();
+  const { searchProgress, isInProgress, setSearchProgress } = useSearchProgress();
   const { showBoundary } = useErrorBoundary<Error>();
   const { setCardList, resetCardList } = useCardList();
   const { resetBoosterList } = useBoosterList();
 
-  const tryParseFile = async (file: File) => {
+  const trySearchDeckboxFile = async (file: File) => {
     try {
       resetCardList();
       resetBoosterList();
-      const cardListNew = await parseFile(setSearchProgress, file);
+      const cardListNew = await searchDeckboxFile(setSearchProgress, file);
       setCardList(removeBasicLand(cardListNew));
       setSearchProgress(100);
     } catch (error) {
@@ -74,11 +76,14 @@ export const useSearchDeckboxFile = () => {
     }
   };
 
-  const searchDeckboxFile = useCallback(async (file: File) => {
-    if (isInProgress() === false) {
-      await tryParseFile(file);
-    }
-  }, []);
+  const searchDeckboxFileCallback = useCallback(
+    async (file: File) => {
+      if (isInProgress() === false) {
+        await trySearchDeckboxFile(file);
+      }
+    },
+    [searchProgress],
+  );
 
-  return searchDeckboxFile;
+  return searchDeckboxFileCallback;
 };
