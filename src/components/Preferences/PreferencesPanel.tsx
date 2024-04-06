@@ -82,7 +82,7 @@ const PreferencesPanel: React.FC = () => {
             <Form.Check
               type="switch"
               label="Balance colors"
-              disabled={preferences.boosterType !== BoosterType.Jumpstart}
+              disabled={preferences.boosterType === BoosterType.Jumpstart}
               checked={preferences.balanceColors}
               onChange={(event) => setPreferences({ ...preferences, balanceColors: event.currentTarget.checked })}
             />
