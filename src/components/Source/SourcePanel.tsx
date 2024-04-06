@@ -4,9 +4,9 @@ import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 
-import { useSearchProgress } from '../../hooks/useSearchProgress';
+import { useActionProgress } from '../../hooks/useActionProgress';
 import { useSourceType } from '../../hooks/useSourceType';
-import { SourceType } from '../../state';
+import { ActionProgress, SourceType } from '../../state';
 import SourceDeckboxFileForm from './SourceDeckboxFileForm';
 import SourceMoxfieldApiForm from './SourceMoxfieldApiForm';
 
@@ -27,24 +27,24 @@ const renderSourceForm = (sourceType: SourceType | null) => {
   throw new Error('Unhandled collection source!');
 };
 
-const renderProgress = (progress: number) => {
-  if (progress === 0) {
+const renderProgress = (progress: ActionProgress) => {
+  if (progress.progress === 0) {
     return (
       <Badge bg="warning" text="dark">
-        UNFETCHED
+        NOT READY
       </Badge>
     );
   }
-  if (progress === 100) {
-    return <Badge bg="success">FETCHED</Badge>;
+  if (progress.progress === 100) {
+    return <Badge bg="success">READY</Badge>;
   }
 
-  return <ProgressBar now={progress} label={`${progress}%`} visuallyHidden />;
+  return <ProgressBar now={progress.progress} label={progress.action} />;
 };
 
 const SourcePanel: React.FC = () => {
+  const { actionProgress, isActionInProgress } = useActionProgress();
   const { sourceType, setSourceType } = useSourceType();
-  const { searchProgress, isInProgress } = useSearchProgress();
 
   return (
     <Card style={{ minHeight: '36rem' }}>
@@ -54,7 +54,7 @@ const SourcePanel: React.FC = () => {
           <FloatingLabel className="mb-3" label="Source">
             <Form.Select
               aria-label="Source"
-              disabled={isInProgress()}
+              disabled={isActionInProgress()}
               value={sourceType as string}
               onChange={(event) => setSourceType(event.currentTarget.value as SourceType)}
             >
@@ -68,7 +68,7 @@ const SourcePanel: React.FC = () => {
           {renderSourceForm(sourceType)}
         </Form>
       </Card.Body>
-      <Card.Footer>{renderProgress(searchProgress)}</Card.Footer>
+      <Card.Footer>{renderProgress(actionProgress)}</Card.Footer>
     </Card>
   );
 };

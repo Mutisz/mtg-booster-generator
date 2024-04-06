@@ -1,13 +1,11 @@
 import { useCallback } from 'react';
-import { useErrorBoundary } from 'react-error-boundary';
 
 import { CollectionSearchError } from '../errors/CollectionSearchError';
-import { CollectionCard, ManaColor, Rarity, SourceType } from '../state';
-import { removeBasicLand } from '../util/removeBasicLand';
-import { useBoosterList } from './useBoosterList';
-import { useCardList } from './useCardList';
-import { useSearchProgress } from './useSearchProgress';
+import { ActionProgress, CollectionCard, ManaColor, Rarity, SourceType } from '../state';
+import { useActionProgress } from './useActionProgress';
+import { useSearchEvents } from './useSearchEvents';
 import { useSourceMoxfield } from './useSourceMoxfield';
+import { useSourceType } from './useSourceType';
 
 type CollectionPageData = {
   totalPages: number;
@@ -35,6 +33,8 @@ const imgUrl = 'https://assets.moxfield.net/cards';
 const dataUrl = 'https://www.moxfield.com/cards';
 
 const searchUrl = `${apiUrl}/collections/search?pageSize=100&sortType=cardName&sortDirection=ascending`;
+
+const progressAction = 'Fetching Moxfield collection';
 
 const getImgUrlList = (cardData: CollectionCardData): string[] =>
   cardData.card.card_faces.length > 0
@@ -70,7 +70,7 @@ const getManaColorList = (colorList: string[]): ManaColor[] =>
   });
 
 const fetchCollectionPage = async (
-  setProgress: (progress: number) => void,
+  setActionProgress: (progress: ActionProgress) => void,
   bearerToken: string,
   page: number = 1,
   cardList: CollectionCard[] = [],
@@ -90,7 +90,7 @@ const fetchCollectionPage = async (
     ...cardList,
     ...collectionPage.data.map((cardData) => ({
       quantity: cardData.quantity,
-      setCode: cardData.card.set,
+      setCode: cardData.card.set.toUpperCase(),
       setName: cardData.card.set_name,
       cardName: cardData.card.name,
       type: cardData.card.type_line,
@@ -101,30 +101,27 @@ const fetchCollectionPage = async (
     })),
   ];
 
-  setProgress((page / collectionPage.totalPages) * 100);
+  setActionProgress({ action: progressAction, progress: (page / collectionPage.totalPages) * 100 });
 
   return page !== collectionPage.totalPages
-    ? fetchCollectionPage(setProgress, bearerToken, ++page, cardListNew)
+    ? fetchCollectionPage(setActionProgress, bearerToken, ++page, cardListNew)
     : cardListNew;
 };
 
 export const useSearchMoxfieldApi = () => {
-  const { searchProgress, isInProgress, setSearchProgress } = useSearchProgress();
-  const { showBoundary } = useErrorBoundary<Error>();
+  const { isActionInProgress, setActionProgress } = useActionProgress();
+  const { sourceType } = useSourceType();
   const { sourceMoxfield } = useSourceMoxfield();
-  const { setCardList, resetCardList } = useCardList();
-  const { resetBoosterList } = useBoosterList();
 
-  const trySearchMoxfieldApiCallback = async () => {
+  const { onSearchStart, onSearchEnd, onSearchFail } = useSearchEvents();
+
+  const trySearchMoxfieldApi = async () => {
     try {
-      resetCardList();
-      resetBoosterList();
-      const cardListNew = await fetchCollectionPage(setSearchProgress, sourceMoxfield.bearerToken);
-      setCardList(removeBasicLand(cardListNew));
-      setSearchProgress(100);
+      onSearchStart();
+      const cardListNew = await fetchCollectionPage(setActionProgress, sourceMoxfield.bearerToken);
+      await onSearchEnd(cardListNew);
     } catch (error) {
-      setSearchProgress(0);
-      showBoundary(
+      onSearchFail(
         new CollectionSearchError(
           (error as Error).message,
           SourceType.MoxfieldApi,
@@ -135,10 +132,10 @@ export const useSearchMoxfieldApi = () => {
   };
 
   const searchMoxfieldApiCallback = useCallback(async () => {
-    if (isInProgress() === false) {
-      await trySearchMoxfieldApiCallback();
+    if (isActionInProgress() === false) {
+      await trySearchMoxfieldApi();
     }
-  }, [searchProgress, sourceMoxfield]);
+  }, [sourceType, sourceMoxfield]);
 
   return searchMoxfieldApiCallback;
 };

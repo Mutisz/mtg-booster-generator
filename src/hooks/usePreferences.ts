@@ -1,9 +1,9 @@
 import { useLocalStorage } from 'usehooks-ts';
 
-import { defaults } from '../state';
+import { Preferences, defaults } from '../state';
 
 export const usePreferences = () => {
-  const [preferences, setPreferences] = useLocalStorage('preferences', defaults.preferences);
+  const [preferences, setPreferences] = useLocalStorage<Preferences>('preferences', defaults.preferences);
 
   return { preferences, setPreferences };
 };

@@ -4,16 +4,16 @@ import Button from 'react-bootstrap/Button';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 
+import { useActionProgress } from '../../hooks/useActionProgress';
 import { usePreferences } from '../../hooks/usePreferences';
 import { useSearchMoxfieldApi } from '../../hooks/useSearchMoxfieldApi';
-import { useSearchProgress } from '../../hooks/useSearchProgress';
 import { useSourceMoxfield } from '../../hooks/useSourceMoxfield';
 import { defaults } from '../../state';
 
 const SourceMoxfieldApiForm: React.FC = () => {
   const { sourceMoxfield, setSourceMoxfield } = useSourceMoxfield();
   const { preferences, setPreferences } = usePreferences();
-  const { isInProgress } = useSearchProgress();
+  const { isActionInProgress } = useActionProgress();
   const searchMoxfieldApi = useSearchMoxfieldApi();
 
   return (
@@ -42,9 +42,9 @@ const SourceMoxfieldApiForm: React.FC = () => {
       </Alert>
       <Button
         variant={'primary'}
-        disabled={sourceMoxfield.bearerToken === '' || isInProgress()}
+        disabled={sourceMoxfield.bearerToken === '' || isActionInProgress()}
         onClick={() => {
-          setPreferences({ ...preferences, expansionSetNameList: defaults.preferences.expansionSetNameList });
+          setPreferences({ ...preferences, expansionSetCodeList: defaults.preferences.expansionSetCodeList });
           void searchMoxfieldApi();
         }}
       >

@@ -75,7 +75,7 @@ const getBoosterCardList = (
   }, []);
 
 const generateJumpstartList = async (preferences: Preferences, cardList: CollectionCard[]): Promise<Booster[]> => {
-  const matchingCardList = cardList.filter((card) => preferences.expansionSetNameList.includes(card.setName));
+  const matchingCardList = cardList.filter((card) => preferences.expansionSetCodeList.includes(card.setCode));
   const setCode = head(matchingCardList)?.setCode;
   if (setCode === undefined) {
     throw new Error('Only one expansion must be selected to generate jumpstarts!');

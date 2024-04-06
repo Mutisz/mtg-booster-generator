@@ -1,13 +1,10 @@
 import csv from 'csvtojson';
 import { useCallback } from 'react';
-import { useErrorBoundary } from 'react-error-boundary';
 
 import { CollectionSearchError } from '../errors/CollectionSearchError';
-import { CollectionCard, Rarity, SourceType } from '../state';
-import { removeBasicLand } from '../util/removeBasicLand';
-import { useBoosterList } from './useBoosterList';
-import { useCardList } from './useCardList';
-import { useSearchProgress } from './useSearchProgress';
+import { ActionProgress, CollectionCard, Rarity, SourceType } from '../state';
+import { useActionProgress } from './useActionProgress';
+import { useSearchEvents } from './useSearchEvents';
 
 type FileCardData = {
   Count: string;
@@ -23,6 +20,8 @@ type FileCardData = {
 
 const dataUrl = 'https://deckbox.org/mtg';
 
+const progressAction = 'Fetching Deckbox collection';
+
 const rarityMap: { [key: string]: Rarity } = {
   Common: Rarity.Common,
   Uncommon: Rarity.Uncommon,
@@ -32,12 +31,17 @@ const rarityMap: { [key: string]: Rarity } = {
 
 const getRarity = (rarity: string): Rarity => rarityMap[rarity] ?? Rarity.Other;
 
-const searchDeckboxFile = async (setProgress: (progress: number) => void, file: File): Promise<CollectionCard[]> => {
+const searchDeckboxFile = async (
+  setActionProgress: (progress: ActionProgress) => void,
+  file: File,
+): Promise<CollectionCard[]> => {
+  // 1 of 3 steps
   const fileString = await file.text();
-  setProgress(33); // 1 of 3 steps
+  setActionProgress({ action: progressAction, progress: 33 });
 
+  // 2 of 3 steps
   const fileData = await csv().fromString(fileString);
-  setProgress(66); // 2 of 3 steps
+  setActionProgress({ action: progressAction, progress: 66 });
 
   return (fileData as FileCardData[]).map((cardData) => ({
     quantity: parseInt(cardData.Count),
@@ -52,21 +56,16 @@ const searchDeckboxFile = async (setProgress: (progress: number) => void, file: 
 };
 
 export const useSearchDeckboxFile = () => {
-  const { searchProgress, isInProgress, setSearchProgress } = useSearchProgress();
-  const { showBoundary } = useErrorBoundary<Error>();
-  const { setCardList, resetCardList } = useCardList();
-  const { resetBoosterList } = useBoosterList();
+  const { isActionInProgress, setActionProgress } = useActionProgress();
+  const { onSearchStart, onSearchEnd, onSearchFail } = useSearchEvents();
 
   const trySearchDeckboxFile = async (file: File) => {
     try {
-      resetCardList();
-      resetBoosterList();
-      const cardListNew = await searchDeckboxFile(setSearchProgress, file);
-      setCardList(removeBasicLand(cardListNew));
-      setSearchProgress(100);
+      onSearchStart();
+      const cardListNew = await searchDeckboxFile(setActionProgress, file);
+      await onSearchEnd(cardListNew);
     } catch (error) {
-      setSearchProgress(0);
-      showBoundary(
+      onSearchFail(
         new CollectionSearchError(
           (error as Error).message,
           SourceType.DeckboxFile,
@@ -76,14 +75,11 @@ export const useSearchDeckboxFile = () => {
     }
   };
 
-  const searchDeckboxFileCallback = useCallback(
-    async (file: File) => {
-      if (isInProgress() === false) {
-        await trySearchDeckboxFile(file);
-      }
-    },
-    [searchProgress],
-  );
+  const searchDeckboxFileCallback = useCallback(async (file: File) => {
+    if (isActionInProgress() === false) {
+      await trySearchDeckboxFile(file);
+    }
+  }, []);
 
   return searchDeckboxFileCallback;
 };

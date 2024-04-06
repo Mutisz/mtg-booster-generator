@@ -39,8 +39,43 @@ export enum ManaColor {
 export type Preferences = {
   boosterType: BoosterType;
   boosterCount: number;
-  expansionSetNameList: string[];
+  expansionSetCodeList: string[];
   balanceColors: boolean;
+};
+
+export type JsonBoosterId = string;
+export type JsonCardUuid = string;
+export type JsonCardWeight = number;
+
+export type JsonCard = {
+  uuid: JsonCardUuid;
+  name: string;
+};
+
+export type JsonBoosterSheet = {
+  cards: { [key: JsonCardUuid]: JsonCardWeight };
+  fixed?: boolean;
+};
+
+export type JsonBooster = {
+  contents: { [key: JsonBoosterId]: JsonCardWeight };
+  weight: JsonCardWeight;
+};
+
+export type JsonBoosterType = {
+  boosters: JsonBooster[];
+  sheets: { [key: JsonBoosterId]: JsonBoosterSheet };
+};
+
+export type JsonSetData = {
+  booster: { jumpstart?: JsonBoosterType };
+  cards: JsonCard[];
+  code: string;
+  name: string;
+};
+
+export type JsonSet = {
+  data: JsonSetData;
 };
 
 export type CollectionCard = {
@@ -67,18 +102,24 @@ export type Booster = {
   name?: string;
 };
 
+export type ActionProgress = {
+  action?: string;
+  progress: number;
+};
+
 export type Defaults = {
   source: Source;
   preferences: Preferences;
-  searchProgressBySource: { [key in SourceType]: number };
+  actionProgressBySource: { [key in SourceType]: ActionProgress };
+  setListBySource: { [key in SourceType]: JsonSetData[] };
   cardListBySource: { [key in SourceType]: CollectionCard[] };
   boosterListBySource: { [key in SourceType]: Booster[] };
 };
 
 const defaultProgressBySource = {
-  [SourceType.MoxfieldApi]: 0,
-  [SourceType.MoxfieldFile]: 0,
-  [SourceType.DeckboxFile]: 0,
+  [SourceType.MoxfieldApi]: { progress: 0 },
+  [SourceType.MoxfieldFile]: { progress: 0 },
+  [SourceType.DeckboxFile]: { progress: 0 },
 };
 
 const defaultListBySource = {
@@ -95,10 +136,11 @@ export const defaults: Defaults = {
   preferences: {
     boosterType: BoosterType.Draft,
     boosterCount: 6,
-    expansionSetNameList: [],
+    expansionSetCodeList: [],
     balanceColors: true,
   },
-  searchProgressBySource: defaultProgressBySource,
+  actionProgressBySource: defaultProgressBySource,
+  setListBySource: defaultListBySource,
   cardListBySource: defaultListBySource,
   boosterListBySource: defaultListBySource,
 };

@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { useErrorBoundary } from 'react-error-boundary';
 import { useLocalStorage } from 'usehooks-ts';
 
-import { BoosterType, defaults } from '../state';
+import { Booster, BoosterType, SourceType, defaults } from '../state';
 import generateBoosterList from '../util/generateBoosterList';
 import generateJumpstartList from '../util/generateJumpstartList';
 import { useCardList } from './useCardList';
@@ -11,11 +11,15 @@ import { usePreferences } from './usePreferences';
 import { useSourceType } from './useSourceType';
 
 export const useBoosterList = () => {
-  const [boosterList, setBoosterList] = useLocalStorage('boosterList', defaults.boosterListBySource);
-  const { showBoundary } = useErrorBoundary<Error>();
+  const [boosterList, setBoosterList] = useLocalStorage<{ [key in SourceType]: Booster[] }>(
+    'boosterList',
+    defaults.boosterListBySource,
+  );
   const { sourceType } = useSourceType();
   const { preferences } = usePreferences();
   const { cardList } = useCardList();
+
+  const { showBoundary } = useErrorBoundary<Error>();
 
   const resetBoosterList = () => setBoosterList({ ...boosterList, [sourceType]: [] });
   const tryGenerateBoosterList = async () => {

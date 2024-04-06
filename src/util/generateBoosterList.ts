@@ -40,10 +40,10 @@ const getMatchingCardList = (
   color: ManaColor | null = null,
 ): CollectionCard[] =>
   cardList.filter((card) => {
-    const setNameList = boosterPart.setName ? [boosterPart.setName] : preferences.expansionSetNameList;
+    const setCodeList = preferences.expansionSetCodeList;
     const cardColorList = card.colorList ?? [];
 
-    const matchPreferences = setNameList.length === 0 || setNameList.includes(card.setName);
+    const matchPreferences = setCodeList.length === 0 || setCodeList.includes(card.setCode);
     const matchRarity = boosterPart.rarity === undefined || boosterPart.rarity.includes(card.rarity);
     const matchColor = color === null || cardColorList.length === 0 || cardColorList.includes(color);
 

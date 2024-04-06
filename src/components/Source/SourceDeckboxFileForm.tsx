@@ -3,11 +3,11 @@ import Alert from 'react-bootstrap/Alert';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 
+import { useActionProgress } from '../../hooks/useActionProgress';
 import { useSearchDeckboxFile } from '../../hooks/useSearchDeckboxFile';
-import { useSearchProgress } from '../../hooks/useSearchProgress';
 
 const SourceDeckboxFileForm: React.FC = () => {
-  const { isInProgress } = useSearchProgress();
+  const { isActionInProgress } = useActionProgress();
   const searchDeckboxFile = useSearchDeckboxFile();
 
   return (
@@ -17,7 +17,7 @@ const SourceDeckboxFileForm: React.FC = () => {
           aria-label="Bearer token"
           type="file"
           accept=".csv"
-          disabled={isInProgress()}
+          disabled={isActionInProgress()}
           onChange={(event: ChangeEvent<HTMLInputElement>) => {
             const file = event.currentTarget.files ? event.currentTarget.files[0] : null;
             if (file === null) {

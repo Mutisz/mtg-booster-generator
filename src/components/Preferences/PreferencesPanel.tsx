@@ -5,32 +5,22 @@ import CardHeader from 'react-bootstrap/CardHeader';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 
+import { useActionProgress } from '../../hooks/useActionProgress';
 import { useBoosterList } from '../../hooks/useBoosterList';
 import { useCardList } from '../../hooks/useCardList';
 import { usePreferences } from '../../hooks/usePreferences';
+import { useSetList } from '../../hooks/useSetList';
 import { BoosterType } from '../../state';
 
 const minBoosterCount = 1;
 const maxBoosterCount = 12;
 
-const useExpansionSetNameList = () => {
-  const { cardList } = useCardList();
-
-  return cardList.reduce<string[]>((acc, value) => {
-    const expansionSetName = value.setName;
-    if (acc.includes(expansionSetName) === false) {
-      acc.push(expansionSetName);
-    }
-
-    return acc.sort();
-  }, []);
-};
-
 const PreferencesPanel: React.FC = () => {
+  const { isActionInProgress } = useActionProgress();
   const { preferences, setPreferences } = usePreferences();
   const { cardList } = useCardList();
-  const { boosterList, generateBoosterList } = useBoosterList();
-  const expansionSetNameList = useExpansionSetNameList();
+  const { generateBoosterList } = useBoosterList();
+  const { setList } = useSetList();
 
   return (
     <Card style={{ minHeight: '36rem' }}>
@@ -70,20 +60,20 @@ const PreferencesPanel: React.FC = () => {
           <FloatingLabel className="mb-3" label="Expansion sets">
             <Form.Select
               multiple
-              value={preferences.expansionSetNameList}
+              value={preferences.expansionSetCodeList}
               style={{ height: 200 }}
               onChange={(event) =>
                 setPreferences({
                   ...preferences,
-                  expansionSetNameList: [...event.currentTarget.selectedOptions].map(
+                  expansionSetCodeList: [...event.currentTarget.selectedOptions].map(
                     (selectedOption) => selectedOption.value,
                   ),
                 })
               }
             >
-              {expansionSetNameList.map((value) => (
-                <option key={value} value={value}>
-                  {value}
+              {setList.map((set) => (
+                <option key={set.code} value={set.code}>
+                  {set.name}
                 </option>
               ))}
             </Form.Select>
@@ -92,14 +82,15 @@ const PreferencesPanel: React.FC = () => {
             <Form.Check
               type="switch"
               label="Balance colors"
+              disabled={preferences.boosterType !== BoosterType.Jumpstart}
               checked={preferences.balanceColors}
               onChange={(event) => setPreferences({ ...preferences, balanceColors: event.currentTarget.checked })}
             />
           </Form.Group>
           <Button
-            variant={boosterList.length === 0 ? 'primary' : 'success'}
-            disabled={cardList.length === 0}
-            onClick={generateBoosterList}
+            variant={'primary'}
+            disabled={cardList.length === 0 || isActionInProgress()}
+            onClick={() => void generateBoosterList()}
           >
             Generate boosters
           </Button>
